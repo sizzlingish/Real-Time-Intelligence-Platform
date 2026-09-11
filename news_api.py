@@ -1,4 +1,3 @@
-```python
 import requests
 import streamlit as st
 
@@ -72,5 +71,4 @@ def fetch_news(
 
     return articles
 
-# NewsData API integration
-```
+
