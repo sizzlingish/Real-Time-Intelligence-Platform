@@ -1,5 +1,9 @@
 import streamlit as st
 
+from news_api import fetch_news
+from retrieval import retrieve_articles
+from ai import generate_intelligence
+
 
 # --------------------------------------------------
 # Page Configuration
@@ -8,7 +12,7 @@ import streamlit as st
 st.set_page_config(
     page_title="Real-Time Intelligence Platform",
     page_icon="🛰️",
-    layout="wide",
+    layout="wide"
 )
 
 
@@ -20,10 +24,8 @@ st.title("🛰️ Real-Time Intelligence Platform")
 
 st.markdown(
     """
-    **Ask about current events. Get real-time intelligence from multiple sources.**
-    
-    RTIP searches current news, analyzes the information, and provides
-    a concise answer with supporting sources.
+    Ask questions about current events and get
+    AI-powered intelligence based on recent news.
     """
 )
 
@@ -33,32 +35,41 @@ st.markdown(
 # --------------------------------------------------
 
 with st.sidebar:
+
     st.header("⚙️ RTIP")
 
-    st.markdown("### Intelligence Sources")
+    st.markdown("### News Sources")
 
-    st.checkbox("NewsData.io", value=True)
-    st.checkbox("GNews", value=True)
+    st.checkbox(
+        "NewsData.io",
+        value=True,
+        disabled=True
+    )
+
+    st.markdown("### Intelligence")
+
+    st.checkbox(
+        "Source comparison",
+        value=True,
+        disabled=True
+    )
+
+    st.checkbox(
+        "Conflict detection",
+        value=True,
+        disabled=True
+    )
 
     st.divider()
 
-    st.markdown("### Analysis")
-
-    st.checkbox("Source comparison", value=True)
-    st.checkbox("Conflict detection", value=True)
-    st.checkbox("Timeline", value=True)
-
-    st.divider()
-
-    st.caption("Real-Time Intelligence Platform")
-    st.caption("Hackathon MVP")
+    st.caption(
+        "Real-Time Intelligence Platform"
+    )
 
 
 # --------------------------------------------------
-# Main Chat Area
+# Chat Input
 # --------------------------------------------------
-
-st.subheader("💬 Ask RTIP")
 
 question = st.chat_input(
     "Ask about current events..."
@@ -71,39 +82,133 @@ question = st.chat_input(
 
 if question:
 
-    # Display user's question
+    # ----------------------------------------------
+    # Show user's question
+    # ----------------------------------------------
+
     with st.chat_message("user"):
         st.write(question)
 
-    # Temporary response
+    # ----------------------------------------------
+    # AI response
+    # ----------------------------------------------
+
     with st.chat_message("assistant"):
 
-        st.markdown("### 🔎 Analyzing current information...")
+        try:
 
-        st.info(
-            "News retrieval and AI analysis will be connected here."
-        )
+            # --------------------------------------
+            # STEP 1: Get news
+            # --------------------------------------
 
-        st.markdown("### 📰 Intelligence Summary")
+            with st.spinner(
+                "🔎 Searching current news..."
+            ):
 
-        st.write(
-            "Your real-time intelligence answer will appear here."
-        )
+                articles = fetch_news(
+                    query=question,
+                    language="en",
+                    limit=15
+                )
 
-        st.markdown("### ⚖️ Source Comparison")
+            if not articles:
 
-        st.write(
-            "Source comparison will appear here."
-        )
+                st.warning(
+                    "No relevant news articles were found."
+                )
 
-        st.markdown("### 📌 Why It Matters")
+                st.stop()
 
-        st.write(
-            "Context and significance will appear here."
-        )
+            # --------------------------------------
+            # STEP 2: Retrieve relevant articles
+            # --------------------------------------
 
-        st.markdown("### 🔗 Sources")
+            with st.spinner(
+                "🧠 Finding the most relevant information..."
+            ):
 
-        st.write(
-            "Retrieved news sources will appear here."
-        )
+                relevant_articles = retrieve_articles(
+                    articles,
+                    question,
+                    max_articles=8
+                )
+
+            if not relevant_articles:
+
+                st.warning(
+                    "No relevant articles were found."
+                )
+
+                st.stop()
+
+            # --------------------------------------
+            # STEP 3: Generate AI intelligence
+            # --------------------------------------
+
+            with st.spinner(
+                "🤖 Analyzing the information..."
+            ):
+
+                answer = generate_intelligence(
+                    question,
+                    relevant_articles
+                )
+
+            # --------------------------------------
+            # STEP 4: Display AI answer
+            # --------------------------------------
+
+            st.markdown(answer)
+
+            # --------------------------------------
+            # STEP 5: Display sources
+            # --------------------------------------
+
+            st.divider()
+
+            st.subheader("🔗 Sources")
+
+            for article in relevant_articles:
+
+                title = article.get(
+                    "title",
+                    "Untitled"
+                )
+
+                source = article.get(
+                    "source",
+                    "Unknown source"
+                )
+
+                url = article.get(
+                    "url"
+                )
+
+                published = article.get(
+                    "published",
+                    "Unknown date"
+                )
+
+                st.markdown(
+                    f"**{title}**"
+                )
+
+                st.caption(
+                    f"{source} • {published}"
+                )
+
+                if url:
+                    st.markdown(
+                        f"[Read original article]({url})"
+                    )
+
+                st.divider()
+
+        except Exception as e:
+
+            st.error(
+                "Something went wrong while processing "
+                "your question."
+            )
+
+            st.exception(e)
