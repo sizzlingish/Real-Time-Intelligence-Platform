@@ -71,4 +71,6 @@ def fetch_news(
         articles.append(normalized_article)
 
     return articles
+
+# NewsData API integration
 ```
