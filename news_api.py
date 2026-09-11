@@ -59,7 +59,6 @@ def fetch_news(
     articles = []
 
     for article in results[:limit]:
-
         normalized_article = {
             "title": article.get("title"),
             "description": article.get("description"),
