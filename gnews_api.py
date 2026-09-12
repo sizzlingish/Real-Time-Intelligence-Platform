@@ -29,8 +29,9 @@ def fetch_gnews(
         "sortby": "publishedAt",
     }
 
-    if query:
-        params["q"] = query
+if query:
+    clean_query = query.strip().rstrip("?")
+    params["q"] = clean_query
 
     if country:
         params["country"] = country
