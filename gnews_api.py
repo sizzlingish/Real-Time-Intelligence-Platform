@@ -30,7 +30,8 @@ def fetch_gnews(
     }
 
     if query:
-        clean_query = query.strip().rstrip("?!.")
+        clean_query = query.strip()
+        clean_query = clean_query.rstrip("?!.").strip()
         params["q"] = clean_query
 
     if country:
