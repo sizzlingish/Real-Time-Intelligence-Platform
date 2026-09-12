@@ -153,38 +153,41 @@ if question:
     # Display user question
     # ----------------------------------------------
 
- 
+    with st.chat_message("user"):
+        st.write(question)
 
 
     # ----------------------------------------------
     # Detect question type
     # ----------------------------------------------
+
     weather_keywords = [
-    "weather",
-    "temperature",
-    "forecast",
-    "rain",
-    "raining",
-    "wind",
-    "windy",
-    "humidity",
-    "hot",
-    "cold",
-    "snow",
-    "snowing",
-    "sunny",
-    "cloudy",
-    "storm",
-    "stormy",
-    "degrees",
-]
+        "weather",
+        "temperature",
+        "forecast",
+        "rain",
+        "raining",
+        "wind",
+        "windy",
+        "humidity",
+        "hot",
+        "cold",
+        "heat",
+        "snow",
+        "snowing",
+        "sunny",
+        "cloudy",
+        "storm",
+        "stormy",
+        "degrees",
+        "how hot",
+        "how cold"
+    ]
 
-question_lower = question.lower()
-
-is_weather_question = any(
-    re.search(rf"\b{re.escape(keyword)}\b", question_lower)
-    for keyword in weather_keywords
-)
+    is_weather_question = any(
+        keyword in question.lower()
+        for keyword in weather_keywords
+    )
 
 
     # ==============================================
