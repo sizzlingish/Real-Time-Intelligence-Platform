@@ -19,71 +19,152 @@ st.set_page_config(
 
 
 # ==================================================
-# VISUAL STYLE
+# SIMPLE COLOR / STYLE
 # ==================================================
 
 st.markdown(
     """
     <style>
 
-    /* Main background */
+    /* Overall page */
 
     .stApp {
-        background:
-            radial-gradient(
-                circle at 90% 0%,
-                rgba(37, 99, 235, 0.12),
-                transparent 32%
-            ),
-            radial-gradient(
-                circle at 10% 10%,
-                rgba(14, 165, 233, 0.07),
-                transparent 28%
-            );
+        background-color: #0b1120;
+        color: #e2e8f0;
     }
 
 
-    /* Main content width */
+    /* Main content */
 
     .block-container {
-        max-width: 1150px;
+        max-width: 1100px;
         padding-top: 2rem;
-        padding-bottom: 5rem;
+        padding-bottom: 4rem;
+    }
+
+
+    /* Main title */
+
+    h1 {
+        color: #f8fafc !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.03em;
+        white-space: nowrap;
+    }
+
+
+    /* Normal text */
+
+    p {
+        color: #cbd5e1;
+    }
+
+
+    /* Captions */
+
+    .stCaption {
+        color: #94a3b8 !important;
     }
 
 
     /* Sidebar */
 
     section[data-testid="stSidebar"] {
-        background-color: #0f172a;
+        background-color: #080f1d;
+        border-right: 1px solid #1e293b;
+    }
+
+
+    /* Sidebar headings */
+
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #f8fafc !important;
     }
 
 
     /* Chat messages */
 
     div[data-testid="stChatMessage"] {
+        background-color: transparent;
+    }
+
+
+    /* User message */
+
+    div[data-testid="stChatMessage"]:has(
+        div[data-testid="chatAvatarIcon-user"]
+    ) {
+        background-color: #111c32;
         border-radius: 14px;
+        border: 1px solid #1e3a5f;
+    }
+
+
+    /* Assistant message */
+
+    div[data-testid="stChatMessage"]:has(
+        div[data-testid="chatAvatarIcon-assistant"]
+    ) {
+        background-color: #0f172a;
+        border-radius: 14px;
+        border: 1px solid #1e293b;
     }
 
 
     /* Chat input */
 
     div[data-testid="stChatInput"] {
+        background-color: #111827;
+        border: 1px solid #334155;
         border-radius: 14px;
+    }
+
+
+    div[data-testid="stChatInput"]:focus-within {
+        border-color: #3b82f6;
     }
 
 
     /* Buttons */
 
     .stButton > button {
-        border-radius: 10px;
+        background-color: #111827;
+        color: #cbd5e1;
+        border: 1px solid #334155;
+        border-radius: 8px;
     }
 
 
-    /* Divider */
+    .stButton > button:hover {
+        background-color: #172554;
+        border-color: #3b82f6;
+        color: #ffffff;
+    }
+
+
+    /* Metrics */
+
+    div[data-testid="stMetric"] {
+        background-color: #111827;
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        padding: 1rem;
+    }
+
+
+    /* Dividers */
 
     hr {
-        opacity: 0.2;
+        border-color: #1e293b;
+    }
+
+
+    /* Links */
+
+    a {
+        color: #60a5fa !important;
     }
 
 
@@ -97,27 +178,14 @@ st.markdown(
 # HEADER
 # ==================================================
 
-header_left, header_right = st.columns(
-    [6, 1]
+st.title(
+    "🛰️ Real-Time Intelligence Platform"
 )
 
-with header_left:
-
-    st.markdown(
-        "#🛰️Real-Time Intelligence Platform"
-    )
-
-    st.caption(
-        "Ask questions about current events and get "
-        "AI-powered intelligence based on recent news."
-    )
-
-
-with header_right:
-
-    st.markdown(
-        "🟢 **LIVE**"
-    )
+st.caption(
+    "Ask questions about current events and get "
+    "AI-powered intelligence based on recent news."
+)
 
 
 # ==================================================
@@ -126,10 +194,10 @@ with header_right:
 
 with st.sidebar:
 
-    st.title("RTIP")
+    st.header("RTIP")
 
     st.caption(
-        "REAL-TIME INTELLIGENCE"
+        "REAL-TIME INTELLIGENCE PLATFORM"
     )
 
     st.divider()
@@ -190,21 +258,19 @@ for message in st.session_state.messages:
 
 
 # ==================================================
-# WELCOME SCREEN
+# WELCOME
 # ==================================================
 
 if not st.session_state.messages:
 
     st.markdown(
-        "## 🛰️ What is happening right now?"
+        "## What is happening right now?"
     )
 
     st.write(
         "Ask about world events, politics, "
         "technology, conflicts, or breaking news."
     )
-
-    st.divider()
 
 
 # ==================================================
@@ -235,7 +301,7 @@ if question:
 
 
     # ----------------------------------------------
-    # Display user message
+    # User message
     # ----------------------------------------------
 
     with st.chat_message("user"):
@@ -244,7 +310,7 @@ if question:
 
 
     # ----------------------------------------------
-    # Detect weather question
+    # Detect weather
     # ----------------------------------------------
 
     weather_keywords = [
@@ -268,9 +334,9 @@ if question:
 
     if is_weather_question:
 
-        try:
+        with st.chat_message("assistant"):
 
-            with st.chat_message("assistant"):
+            try:
 
                 with st.spinner(
                     "Getting current weather..."
@@ -283,8 +349,8 @@ if question:
 
                 current = weather["current"]
 
-                st.markdown(
-                    "### 🌦️ Current Weather"
+                st.subheader(
+                    "Current Weather"
                 )
 
                 col1, col2, col3 = st.columns(3)
@@ -310,9 +376,7 @@ if question:
                         f"{current['wind_speed_10m']} km/h"
                     )
 
-        except Exception as e:
-
-            with st.chat_message("assistant"):
+            except Exception as e:
 
                 st.error(
                     "Something went wrong while "
@@ -328,12 +392,12 @@ if question:
 
     else:
 
-        try:
+        with st.chat_message("assistant"):
 
-            with st.chat_message("assistant"):
+            try:
 
                 # --------------------------------------
-                # Search news
+                # Get news
                 # --------------------------------------
 
                 with st.spinner(
@@ -359,7 +423,7 @@ if question:
 
 
                 # --------------------------------------
-                # No articles
+                # Check articles
                 # --------------------------------------
 
                 if not articles:
@@ -396,7 +460,7 @@ if question:
 
 
                 # --------------------------------------
-                # Gemini
+                # Generate intelligence
                 # --------------------------------------
 
                 with st.spinner(
@@ -410,11 +474,11 @@ if question:
 
 
                 # --------------------------------------
-                # Intelligence Brief
+                # Display answer
                 # --------------------------------------
 
                 st.markdown(
-                    "## 🧠 Intelligence Brief"
+                    "### 🧠 Intelligence Brief"
                 )
 
                 st.markdown(answer)
@@ -426,8 +490,8 @@ if question:
 
                 st.divider()
 
-                st.markdown(
-                    "### 🔗 Sources"
+                st.subheader(
+                    "Sources"
                 )
 
 
@@ -448,7 +512,9 @@ if question:
                         "Unknown date"
                     )
 
-                    url = article.get("url")
+                    url = article.get(
+                        "url"
+                    )
 
 
                     st.markdown(
@@ -471,9 +537,7 @@ if question:
                     st.divider()
 
 
-        except Exception as e:
-
-            with st.chat_message("assistant"):
+            except Exception as e:
 
                 st.error(
                     "Something went wrong while "
