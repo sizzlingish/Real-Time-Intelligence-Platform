@@ -160,8 +160,7 @@ if question:
     # ----------------------------------------------
     # Detect question type
     # ----------------------------------------------
-
-   weather_keywords = [
+    weather_keywords = [
     "weather",
     "temperature",
     "forecast",
