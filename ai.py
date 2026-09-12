@@ -1,14 +1,10 @@
 import os
-
 from google import genai
 
 
-# ---------------------------------------------------------
-# GEMINI CONFIGURATION
-# ---------------------------------------------------------
-
-MODEL_NAME = "gemini-2.5-flash"
-
+# --------------------------------------------------
+# Configuration
+# --------------------------------------------------
 
 def get_gemini_api_key():
     """
@@ -25,6 +21,10 @@ def get_gemini_api_key():
     return api_key
 
 
+# --------------------------------------------------
+# Create Gemini Client
+# --------------------------------------------------
+
 def get_client():
     """
     Create and return the Gemini client.
@@ -37,14 +37,14 @@ def get_client():
     )
 
 
-# ---------------------------------------------------------
-# BUILD NEWS CONTEXT
-# ---------------------------------------------------------
+# --------------------------------------------------
+# Build News Context
+# --------------------------------------------------
 
 def build_news_context(articles):
     """
-    Convert retrieved news articles into a clean
-    text context for Gemini.
+    Convert retrieved news articles into text
+    that Gemini can analyze.
     """
 
     if not articles:
@@ -52,226 +52,154 @@ def build_news_context(articles):
 
     context = []
 
-    for i, article in enumerate(
-        articles,
-        start=1
-    ):
+    for i, article in enumerate(articles, start=1):
 
-        title = article.get(
-            "title",
-            "No title available"
-        )
-
+        title = article.get("title", "No title")
         description = article.get(
             "description",
-            "No description available"
+            "No description available."
         )
-
         source = article.get(
             "source",
             "Unknown source"
         )
-
         published = article.get(
             "published",
-            "Unknown date"
+            "Unknown time"
         )
-
         url = article.get(
             "url",
-            "No URL available"
+            "No URL"
         )
-
 
         article_text = f"""
 ARTICLE {i}
 
 Title: {title}
-
 Source: {source}
-
 Published: {published}
-
 Description: {description}
-
 URL: {url}
 """
 
+        context.append(article_text)
 
-        context.append(
-            article_text.strip()
-        )
-
-
-    return "\n\n".join(context)
+    return "\n".join(context)
 
 
-# ---------------------------------------------------------
-# GENERATE INTELLIGENCE
-# ---------------------------------------------------------
+# --------------------------------------------------
+# Generate Intelligence
+# --------------------------------------------------
 
-def generate_intelligence(
-    question,
-    articles
-):
+def generate_intelligence(question, articles):
     """
-    Generate an intelligence answer using
-    the retrieved news articles.
-
-    Expected usage:
-
-        generate_intelligence(
-            question,
-            relevant_articles
-        )
+    Generate an AI-powered intelligence response
+    using the retrieved news articles.
     """
-
-    if not question:
-        raise ValueError(
-            "Question cannot be empty."
-        )
-
-    if not articles:
-        raise ValueError(
-            "No articles were provided."
-        )
-
 
     client = get_client()
 
-    news_context = build_news_context(
-        articles
-    )
-
+    news_context = build_news_context(articles)
 
     prompt = f"""
-You are the AI intelligence analyst for
-the Real-Time Intelligence Platform (RTIP).
+You are the AI analyst for the
+Real-Time Intelligence Platform (RTIP).
 
-The user asked:
+The user has asked:
 
 "{question}"
 
+Below are current news articles retrieved from
+external news sources.
 
-Your task is to answer the user's question
-using ONLY the news information provided below.
-
-================ NEWS DATA ================
+---------------- NEWS DATA ----------------
 
 {news_context}
 
-============== END NEWS DATA ==============
+-------------- END NEWS DATA --------------
 
+Your job is to analyze ONLY the information
+provided in the news data.
 
-IMPORTANT RULES:
+Do NOT invent facts.
 
-1. Do not invent facts.
+If the available information is insufficient,
+clearly say so.
 
-2. Do not use information that is not present
-   in the supplied news articles.
+If different sources report conflicting
+information, identify the disagreement.
 
-3. If the articles do not contain enough
-   information to answer the question,
-   clearly say that the available information
-   is insufficient.
-
-4. If different sources report different
-   information, identify the disagreement.
-
-5. Distinguish confirmed information from
-   uncertainty.
-
-6. Prefer the newest information when discussing
-   current developments.
-
-7. Do not repeat the same information unnecessarily.
-
-8. Keep the answer concise and useful.
-
-9. Do not mention that you are an AI unless
-   necessary.
-
-10. Do not fabricate statistics, dates, names,
-    locations, quotes, or events.
-
-
-FORMAT YOUR RESPONSE:
+Structure your response using these sections:
 
 ### 📰 Intelligence Summary
-
-Give a concise answer to the user's question
-based on the retrieved news.
-
+Give a concise summary of what is happening.
 
 ### 🔎 Key Developments
-
 List the most important developments.
 
-Use short bullet points.
-
-
 ### ⚖️ Source Comparison
-
-Explain what the available sources agree on.
-
-If sources disagree, clearly explain the
-difference.
-
+Explain what the available sources agree on
+and where they differ.
 
 ### 📌 Why It Matters
-
-Explain why the developments are important,
-but only when the significance can reasonably
-be supported by the supplied information.
-
+Explain the significance or possible impact
+based only on the available information.
 
 ### 🕐 Latest Information
+Mention the most recent information available
+from the supplied articles.
 
-Identify the newest relevant information
-available in the retrieved articles.
+Keep the response clear, factual and concise.
 
-Mention the source and date when available.
-
-
-Keep the overall response concise.
-
-Do not add information that is not supported
-by the supplied news.
+Do not present speculation as fact.
 """
-
 
     try:
 
         response = client.models.generate_content(
-            model=MODEL_NAME,
-            contents=prompt,
+            model="gemini-3.6-flash",
+            contents=prompt
         )
+
+        return response.text
 
     except Exception as e:
 
         raise RuntimeError(
             f"Gemini API request failed: {e}"
-        ) from e
-
-
-    if not response:
-        raise RuntimeError(
-            "Gemini returned an empty response."
         )
 
 
-    answer = getattr(
-        response,
-        "text",
-        None
-    )
+# --------------------------------------------------
+# Simple Test
+# --------------------------------------------------
 
+if __name__ == "__main__":
 
-    if not answer:
-        raise RuntimeError(
-            "Gemini returned an empty text response."
+    test_articles = [
+        {
+            "title": "Example news headline",
+            "description": (
+                "Example description of a current event."
+            ),
+            "url": "https://example.com",
+            "source": "Example News",
+            "published": "2026-09-12 10:00:00",
+        }
+    ]
+
+    question = "What is happening in this story?"
+
+    try:
+
+        answer = generate_intelligence(
+            question,
+            test_articles
         )
 
+        print("\nRTIP Intelligence:\n")
+        print(answer)
 
-    return answer.strip()
+    except Exception as e:
 
+        print(f"Error: {e}")
