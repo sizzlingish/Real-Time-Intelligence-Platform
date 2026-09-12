@@ -23,10 +23,11 @@ def fetch_gnews(
     api_key = get_gnews_api_key()
 
     params = {
-        "apikey": api_key,
-        "lang": language,
-        "max": max_results,
-    }
+    "apikey": api_key,
+    "lang": language,
+    "max": max_results,
+    "sortby": "publishedAt",
+}
 
     if query:
         params["q"] = query
