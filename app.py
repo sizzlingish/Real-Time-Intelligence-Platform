@@ -1,17 +1,22 @@
 import re
+
 import streamlit as st
 
 from news_api import fetch_news
 from gnews_api import fetch_gnews
 from open_meteo_api import fetch_weather
 from retrieval import retrieve_articles
-
 from ai import generate_intelligence
+
 from visualization import (
     generate_visualizations,
     render_visualizations_in_streamlit,
 )
 
+
+# =========================================================
+# PAGE CONFIGURATION
+# =========================================================
 
 st.set_page_config(
     page_title="RTIP - Real-Time Intelligence Platform",
@@ -20,9 +25,9 @@ st.set_page_config(
 )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # WEATHER LOCATION EXTRACTION
-# ---------------------------------------------------------
+# =========================================================
 
 def extract_weather_location(question):
     question = question.strip()
@@ -48,19 +53,19 @@ def extract_weather_location(question):
         match = re.search(
             pattern,
             question,
-            re.IGNORECASE
+            re.IGNORECASE,
         )
 
         if match:
             location = match.group(1)
-            return location.strip(" ?!.,")
-    
+            return location.strip(" ?!.,").strip()
+
     return None
 
 
-# ---------------------------------------------------------
-# WEATHER DETECTION
-# ---------------------------------------------------------
+# =========================================================
+# WEATHER QUESTION DETECTION
+# =========================================================
 
 def is_weather_question(question):
     weather_keywords = [
@@ -85,18 +90,19 @@ def is_weather_question(question):
 
     question_lower = question.lower()
 
-    return any(
-        re.search(
+    for keyword in weather_keywords:
+        if re.search(
             rf"\b{re.escape(keyword)}\b",
-            question_lower
-        )
-        for keyword in weather_keywords
-    )
+            question_lower,
+        ):
+            return True
+
+    return False
 
 
-# ---------------------------------------------------------
+# =========================================================
 # SOURCE DISPLAY
-# ---------------------------------------------------------
+# =========================================================
 
 def render_sources(articles):
     st.subheader("🔗 Important Sources")
@@ -104,25 +110,26 @@ def render_sources(articles):
     for article in articles:
         title = article.get(
             "title",
-            "Untitled"
+            "Untitled",
         )
 
         source = article.get(
             "source",
-            "Unknown source"
+            "Unknown source",
         )
 
         published = article.get(
             "published",
-            "Unknown date"
+            "Unknown date",
         )
 
         url = article.get(
             "url",
-            ""
+            "",
         )
 
         st.markdown(f"**{title}**")
+
         st.caption(
             f"{source} • {published}"
         )
@@ -135,9 +142,9 @@ def render_sources(articles):
         st.divider()
 
 
-# ---------------------------------------------------------
+# =========================================================
 # PAGE HEADER
-# ---------------------------------------------------------
+# =========================================================
 
 st.title(
     "🛰️ Real-Time Intelligence Platform"
@@ -149,15 +156,14 @@ st.write(
 )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # SIDEBAR
-# ---------------------------------------------------------
+# =========================================================
 
 with st.sidebar:
 
     st.header("⚙️ RTIP Settings")
 
-    # Location
     location = st.selectbox(
         "Select Location",
         [
@@ -173,7 +179,6 @@ with st.sidebar:
         ],
     )
 
-    # Topic
     topic = st.selectbox(
         "Select Topic",
         [
@@ -190,7 +195,6 @@ with st.sidebar:
         ],
     )
 
-    # Answer mode
     answer_mode = st.radio(
         "Answer Mode",
         [
@@ -199,7 +203,6 @@ with st.sidebar:
         ],
     )
 
-    # Article limit
     article_limit = st.slider(
         "Articles to retrieve",
         min_value=5,
@@ -214,26 +217,33 @@ with st.sidebar:
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # CHAT INPUT
-# ---------------------------------------------------------
+# =========================================================
 
 question = st.chat_input(
     "Ask a question about current events..."
 )
 
 
-# ---------------------------------------------------------
-# PROCESS QUESTION
-# ---------------------------------------------------------
+# =========================================================
+# MAIN PROCESSING
+# =========================================================
 
 if question:
 
-    # Show user message
+    # -----------------------------------------------------
+    # USER MESSAGE
+    # -----------------------------------------------------
+
     with st.chat_message("user"):
         st.write(question)
 
-    # Assistant response
+
+    # -----------------------------------------------------
+    # ASSISTANT MESSAGE
+    # -----------------------------------------------------
+
     with st.chat_message("assistant"):
 
         try:
@@ -255,11 +265,11 @@ if question:
                     )
 
                     st.info(
-                        "Example: "
-                        "What is the weather in London?"
+                        "Example: What is the weather in London?"
                     )
 
                     st.stop()
+
 
                 with st.spinner(
                     f"🌦️ Getting weather for "
@@ -270,75 +280,122 @@ if question:
                         location=location_from_question
                     )
 
-                current = weather["current"]
 
-                temperature = current[
+                current = weather.get(
+                    "current",
+                    {}
+                )
+
+
+                temperature = current.get(
                     "temperature_2m"
-                ]
+                )
 
-                humidity = current[
+                humidity = current.get(
                     "relative_humidity_2m"
-                ]
+                )
 
-                wind = current[
+                wind = current.get(
                     "wind_speed_10m"
-                ]
+                )
+
+
+                if (
+                    temperature is None
+                    or humidity is None
+                    or wind is None
+                ):
+
+                    st.error(
+                        "Weather data was incomplete."
+                    )
+
+                    st.stop()
+
+
+                # ---------------------------------------------
+                # Temperature description
+                # ---------------------------------------------
 
                 if temperature >= 35:
+
                     temperature_description = (
                         "very hot"
                     )
 
                 elif temperature >= 30:
+
                     temperature_description = (
                         "hot"
                     )
 
                 elif temperature >= 25:
+
                     temperature_description = (
                         "warm"
                     )
 
                 elif temperature >= 18:
+
                     temperature_description = (
                         "mild"
                     )
 
                 elif temperature >= 10:
+
                     temperature_description = (
                         "cool"
                     )
 
                 else:
+
                     temperature_description = (
                         "cold"
                     )
 
+
+                # ---------------------------------------------
+                # Wind description
+                # ---------------------------------------------
+
                 if wind >= 30:
+
                     wind_description = (
                         "strong wind"
                     )
 
                 elif wind >= 15:
+
                     wind_description = (
                         "moderate wind"
                     )
 
                 else:
+
                     wind_description = (
                         "light wind"
                     )
 
+
+                # ---------------------------------------------
+                # Weather answer
+                # ---------------------------------------------
+
                 st.markdown(
                     f"""
-🌦️ **{location_from_question.title()}:**
-{temperature}°C with {humidity}% humidity
-and {wind_description}.
+🌦️ **{location_from_question.title()}**
+
+**Temperature:** {temperature}°C
+
+**Humidity:** {humidity}%
+
+**Wind:** {wind} km/h ({wind_description})
 
 The current conditions are relatively
 **{temperature_description}**.
 """
                 )
+
 
             # =================================================
             # NEWS BRANCH
@@ -347,7 +404,7 @@ The current conditions are relatively
             else:
 
                 # ---------------------------------------------
-                # Build news search query
+                # Build search query
                 # ---------------------------------------------
 
                 if location == "Worldwide":
@@ -364,8 +421,9 @@ The current conditions are relatively
                         f"{question}"
                     )
 
+
                 # ---------------------------------------------
-                # Fetch NewsData
+                # NewsData
                 # ---------------------------------------------
 
                 with st.spinner(
@@ -378,8 +436,9 @@ The current conditions are relatively
                         limit=article_limit,
                     )
 
+
                 # ---------------------------------------------
-                # Fetch GNews
+                # GNews
                 # ---------------------------------------------
 
                 with st.spinner(
@@ -392,14 +451,16 @@ The current conditions are relatively
                         max_results=article_limit,
                     )
 
+
                 # ---------------------------------------------
-                # Combine sources
+                # Combine articles
                 # ---------------------------------------------
 
                 articles = (
                     newsdata_articles
                     + gnews_articles
                 )
+
 
                 if not articles:
 
@@ -410,8 +471,9 @@ The current conditions are relatively
 
                     st.stop()
 
+
                 # ---------------------------------------------
-                # Retrieval / ranking / deduplication
+                # Retrieve relevant articles
                 # ---------------------------------------------
 
                 with st.spinner(
@@ -424,10 +486,15 @@ The current conditions are relatively
                         max_articles=8,
                     )
 
-                # Safety fallback
+
+                # ---------------------------------------------
+                # Fallback
+                # ---------------------------------------------
+
                 if not relevant_articles:
 
                     relevant_articles = articles[:8]
+
 
                 if not relevant_articles:
 
@@ -437,29 +504,32 @@ The current conditions are relatively
 
                     st.stop()
 
+
                 # ---------------------------------------------
-# Generate AI answer
-# ---------------------------------------------
+                # Generate AI answer
+                # ---------------------------------------------
 
-with st.spinner(
-    "🤖 Generating intelligence..."
-):
-    answer = generate_intelligence(
-        question,
-        relevant_articles,
-    )
+                with st.spinner(
+                    "🤖 Generating intelligence..."
+                ):
 
-# ---------------------------------------------
-# Display answer
-# ---------------------------------------------
+                    answer = generate_intelligence(
+                        question,
+                        relevant_articles,
+                    )
 
-st.markdown(answer)
+
+                # ---------------------------------------------
+                # Display AI answer
+                # ---------------------------------------------
+
+                st.markdown(answer)
+
 
                 # ---------------------------------------------
                 # Visualization
                 #
                 # Only generate graphs in Detailed mode.
-                # Concise mode stays clean.
                 # ---------------------------------------------
 
                 if (
@@ -480,17 +550,28 @@ st.markdown(answer)
                             )
                         )
 
-                    render_visualizations_in_streamlit(
-                        visualization_result
-                    )
+
+                    if visualization_result:
+
+                        render_visualizations_in_streamlit(
+                            visualization_result
+                        )
+
 
                 # ---------------------------------------------
                 # Sources
                 # ---------------------------------------------
 
+                st.divider()
+
                 render_sources(
                     relevant_articles
                 )
+
+
+        # =====================================================
+        # ERROR HANDLING
+        # =====================================================
 
         except Exception as error:
 
