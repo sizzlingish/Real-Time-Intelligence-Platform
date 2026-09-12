@@ -105,7 +105,8 @@ URL: {url}
 
 def generate_intelligence(
     question,
-    articles
+    articles,
+    concise=False
 ):
 
     if not question:
@@ -124,7 +125,89 @@ def generate_intelligence(
         articles
     )
 
-    prompt = f"""
+
+    # =====================================================
+    # CONCISE MODE
+    # =====================================================
+
+    if concise:
+
+        prompt = f"""
+You are the AI intelligence analyst for
+the Real-Time Intelligence Platform (RTIP).
+
+The user asked:
+
+"{question}"
+
+Use ONLY the supplied news articles as evidence.
+
+================ NEWS DATA ================
+
+{news_context}
+
+============== END NEWS DATA ==============
+
+
+IMPORTANT RULES:
+
+1. Answer the user's question directly.
+
+2. Use only information supported by the
+   supplied articles.
+
+3. Do not invent facts, names, dates,
+   statistics, quotes, or events.
+
+4. If sources disagree, briefly mention
+   the disagreement.
+
+5. Prefer the newest relevant information.
+
+6. Do not repeat information.
+
+7. Do not add unnecessary background.
+
+8. Keep the answer VERY SHORT.
+
+9. Do not write a long report.
+
+10. Do not include a separate "Why It Matters"
+    or "Latest Information" section.
+
+
+FORMAT:
+
+### 📰 Intelligence Summary
+
+Write 2-3 short sentences directly answering
+the user's question.
+
+
+### 🔎 Key Developments
+
+Give ONLY the 3 most important developments.
+
+Each bullet must be one short sentence.
+
+
+### ⚖️ Sources
+
+In 1 short sentence, state whether the sources
+generally agree or highlight an important
+difference.
+
+Keep the entire response concise.
+Aim for roughly 100-150 words maximum.
+"""
+
+    # =====================================================
+    # DETAILED MODE
+    # =====================================================
+
+    else:
+
+        prompt = f"""
 You are the AI intelligence analyst for
 the Real-Time Intelligence Platform (RTIP).
 
@@ -166,7 +249,7 @@ IMPORTANT RULES:
 
 7. Distinguish reported facts from uncertainty.
 
-8. Keep the answer concise and useful.
+8. Keep the answer useful and well structured.
 
 9. Do not repeat the same information.
 
@@ -179,7 +262,7 @@ FORMAT:
 
 ### 📰 Intelligence Summary
 
-Give a concise answer to the user's question.
+Give a clear answer to the user's question.
 
 
 ### 🔎 Key Developments
@@ -210,8 +293,13 @@ Include the source and publication date
 when available.
 
 
-Keep the response clear, factual, and concise.
+Keep the response clear, factual, and useful.
 """
+
+
+    # =====================================================
+    # GEMINI REQUEST
+    # =====================================================
 
     try:
 
@@ -226,6 +314,10 @@ Keep the response clear, factual, and concise.
             f"Gemini API request failed: {error}"
         ) from error
 
+
+    # =====================================================
+    # VALIDATE RESPONSE
+    # =====================================================
 
     if response is None:
 
