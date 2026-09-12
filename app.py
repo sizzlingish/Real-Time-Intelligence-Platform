@@ -6,11 +6,7 @@ from gnews_api import fetch_gnews
 from open_meteo_api import fetch_weather
 from retrieval import retrieve_articles
 
-from ai import (
-    generate_concise_intelligence,
-    generate_intelligence,
-)
-
+from ai import generate_intelligence
 from visualization import (
     generate_visualizations,
     render_visualizations_in_streamlit,
