@@ -1,154 +1,315 @@
-import re
-import requests
 import streamlit as st
 
-
-GNEWS_API_URL = "https://gnews.io/api/v4/search"
-
-
-def get_gnews_api_key():
-    try:
-        return st.secrets["GNEWS_API_KEY"]
-    except KeyError:
-        raise ValueError(
-            "GNEWS_API_KEY is not configured in Streamlit Secrets."
-        )
+from news_api import fetch_news
+from gnews_api import fetch_gnews
+from open_meteo_api import fetch_weather
+from retrieval import retrieve_articles
+from ai import generate_intelligence
 
 
-def clean_gnews_query(query):
+# --------------------------------------------------
+# Page Configuration
+# --------------------------------------------------
+
+st.set_page_config(
+    page_title="Real-Time Intelligence Platform",
+    page_icon="🛰️",
+    layout="wide"
+)
+
+
+# --------------------------------------------------
+# Header
+# --------------------------------------------------
+
+st.title("🛰️ Real-Time Intelligence Platform")
+
+st.markdown(
     """
-    Clean the user's question before sending it to GNews.
-    Removes emojis and characters that can cause
-    GNews query syntax errors.
+    Ask questions about current events and get
+    AI-powered intelligence based on recent news.
     """
+)
 
-    if not query:
-        return ""
 
-    # Remove emojis / non-standard characters
-    query = query.encode(
-        "ascii",
-        "ignore"
-    ).decode("ascii")
+# --------------------------------------------------
+# Sidebar
+# --------------------------------------------------
 
-    # Remove punctuation that can cause query issues
-    query = re.sub(
-        r"[^\w\s-]",
-        " ",
-        query
+with st.sidebar:
+
+    st.header("⚙️ RTIP")
+
+    st.markdown("### News Sources")
+
+    st.checkbox(
+        "NewsData.io",
+        value=True,
+        disabled=True
     )
 
-    # Remove excessive whitespace
-    query = re.sub(
-        r"\s+",
-        " ",
-        query
-    ).strip()
+    st.checkbox(
+        "GNews",
+        value=True,
+        disabled=True
+    )
 
-    return query
+    st.markdown("### Intelligence")
+
+    st.checkbox(
+        "Source comparison",
+        value=True,
+        disabled=True
+    )
+
+    st.checkbox(
+        "Conflict detection",
+        value=True,
+        disabled=True
+    )
+
+    st.divider()
+
+    st.caption(
+        "Real-Time Intelligence Platform"
+    )
 
 
-def fetch_gnews(
-    query=None,
-    language="en",
-    country=None,
-    max_results=10
-):
+# --------------------------------------------------
+# Chat Input
+# --------------------------------------------------
 
-    api_key = get_gnews_api_key()
+question = st.chat_input(
+    "Ask about current events..."
+)
 
-    params = {
-        "apikey": api_key,
-        "lang": language,
-        "max": max_results,
-        "sortby": "publishedAt",
-    }
 
-    if query:
+# --------------------------------------------------
+# Process Question
+# --------------------------------------------------
 
-        clean_query = clean_gnews_query(
-            query
-        )
+if question:
 
-        if clean_query:
+    # ----------------------------------------------
+    # Display user question
+    # ----------------------------------------------
 
-            params["q"] = clean_query
+    with st.chat_message("user"):
+        st.write(question)
 
-    if country:
 
-        params["country"] = country
+    # ----------------------------------------------
+    # Detect question type
+    # ----------------------------------------------
 
-    try:
+    weather_keywords = [
+        "weather",
+        "temperature",
+        "forecast",
+        "rain",
+        "wind",
+        "humidity"
+    ]
 
-        response = requests.get(
-            GNEWS_API_URL,
-            params=params,
-            timeout=15
-        )
+    is_weather_question = any(
+        keyword in question.lower()
+        for keyword in weather_keywords
+    )
 
-        if response.status_code != 200:
 
-            raise RuntimeError(
-                f"GNews API error: "
-                f"{response.status_code} - "
-                f"{response.text}"
-            )
+    # ==============================================
+    # WEATHER QUESTION
+    # ==============================================
 
-        data = response.json()
+    if is_weather_question:
 
-    except requests.exceptions.RequestException as e:
+        with st.chat_message("assistant"):
 
-        raise RuntimeError(
-            f"GNews API request failed: {e}"
-        )
+            try:
 
-    if "articles" not in data:
+                with st.spinner(
+                    "🌦️ Getting current weather..."
+                ):
 
-        raise RuntimeError(
-            f"GNews API error: {data}"
-        )
+                    weather = fetch_weather(
+                        latitude=33.6844,
+                        longitude=73.0479
+                    )
 
-    articles = []
+                current = weather["current"]
 
-    for article in data.get(
-        "articles",
-        []
-    ):
+                st.subheader(
+                    "🌦️ Current Weather"
+                )
 
-        source = (
-            article.get("source")
-            or {}
-        )
+                st.write(
+                    f"🌡️ Temperature: "
+                    f"{current['temperature_2m']} °C"
+                )
 
-        normalized_article = {
+                st.write(
+                    f"💧 Humidity: "
+                    f"{current['relative_humidity_2m']}%"
+                )
 
-            "title": article.get(
-                "title"
-            ),
+                st.write(
+                    f"💨 Wind: "
+                    f"{current['wind_speed_10m']} km/h"
+                )
 
-            "description": article.get(
-                "description"
-            ),
+            except Exception as e:
 
-            "url": article.get(
-                "url"
-            ),
+                st.error(
+                    "Something went wrong while "
+                    "getting weather information."
+                )
 
-            "source": source.get(
-                "name"
-            ),
+                st.exception(e)
 
-            "published": article.get(
-                "publishedAt"
-            ),
 
-            "image": article.get(
-                "image"
-            ),
-        }
+    # ==============================================
+    # NEWS QUESTION
+    # ==============================================
 
-        articles.append(
-            normalized_article
-        )
+    else:
 
-    return articles
+        with st.chat_message("assistant"):
+
+            try:
+
+                # ----------------------------------
+                # STEP 1: Get news
+                # ----------------------------------
+
+                with st.spinner(
+                    "🔎 Searching current news..."
+                ):
+
+                    newsdata_articles = fetch_news(
+                        query=question,
+                        language="en",
+                        limit=15
+                    )
+
+                    gnews_articles = fetch_gnews(
+                        query=question,
+                        language="en",
+                        max_results=10
+                    )
+
+                    articles = (
+                        newsdata_articles
+                        + gnews_articles
+                    )
+
+
+                # ----------------------------------
+                # Check articles
+                # ----------------------------------
+
+                if not articles:
+
+                    st.warning(
+                        "No relevant news articles were found."
+                    )
+
+                    st.stop()
+
+
+                # ----------------------------------
+                # STEP 2: Retrieve relevant articles
+                # ----------------------------------
+
+                with st.spinner(
+                    "🧠 Finding the most relevant information..."
+                ):
+
+                    relevant_articles = retrieve_articles(
+                        articles,
+                        question,
+                        max_articles=8
+                    )
+
+
+                if not relevant_articles:
+
+                    st.warning(
+                        "No relevant articles were found."
+                    )
+
+                    st.stop()
+
+
+                # ----------------------------------
+                # STEP 3: Generate AI intelligence
+                # ----------------------------------
+
+                with st.spinner(
+                    "🤖 Analyzing the information..."
+                ):
+
+                    answer = generate_intelligence(
+                        question,
+                        relevant_articles
+                    )
+
+
+                # ----------------------------------
+                # STEP 4: Display AI answer
+                # ----------------------------------
+
+                st.markdown(answer)
+
+
+                # ----------------------------------
+                # STEP 5: Display sources
+                # ----------------------------------
+
+                st.divider()
+
+                st.subheader("🔗 Sources")
+
+                for article in relevant_articles:
+
+                    title = article.get(
+                        "title",
+                        "Untitled"
+                    )
+
+                    source = article.get(
+                        "source",
+                        "Unknown source"
+                    )
+
+                    url = article.get("url")
+
+                    published = article.get(
+                        "published",
+                        "Unknown date"
+                    )
+
+                    st.markdown(
+                        f"**{title}**"
+                    )
+
+                    st.caption(
+                        f"{source} • {published}"
+                    )
+
+                    if url:
+
+                        st.markdown(
+                            f"[Read original article]({url})"
+                        )
+
+                    st.divider()
+
+
+            except Exception as e:
+
+                st.error(
+                    "Something went wrong while processing "
+                    "your question."
+                )
+
+                st.exception(e)
