@@ -104,7 +104,7 @@ header_left, header_right = st.columns(
 with header_left:
 
     st.markdown(
-        "# 🛰️ Real-Time Intelligence Platform"
+        "#🛰️Real-Time Intelligence Platform"
     )
 
     st.caption(
