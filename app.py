@@ -106,11 +106,19 @@ if question:
                 "🔎 Searching current news..."
             ):
 
-                articles = fetch_news(
-                    query=question,
-                    language="en",
-                    limit=15
-                )
+              newsdata_articles = fetch_news(
+    query=question,
+    language="en",
+    limit=15
+)
+
+gnews_articles = fetch_gnews(
+    query=question,
+    language="en",
+    max_results=10
+)
+
+articles = newsdata_articles + gnews_articles
 
             if not articles:
 
