@@ -22,6 +22,253 @@ st.set_page_config(
     layout="wide",
 )
 
+# ============================================================
+# PROFESSIONAL RTIP STYLING
+# ============================================================
+
+st.markdown(
+    """
+    <style>
+
+    /* ========================================================
+       GLOBAL PAGE
+       ======================================================== */
+
+    .stApp {
+        background:
+            radial-gradient(
+                circle at 50% -15%,
+                #162a4a 0%,
+                #0b1120 40%,
+                #070c16 100%
+            );
+        color: #e2e8f0;
+    }
+
+    .block-container {
+        max-width: 1100px;
+        padding-top: 2.2rem;
+        padding-bottom: 5rem;
+    }
+
+
+    /* ========================================================
+       MAIN TITLE
+       ======================================================== */
+
+    h1 {
+        color: #f8fafc !important;
+        font-size: 2.25rem !important;
+        font-weight: 750 !important;
+        letter-spacing: -0.035em;
+        white-space: nowrap;
+        margin-bottom: 0.35rem !important;
+    }
+
+    h2,
+    h3 {
+        color: #f1f5f9 !important;
+    }
+
+    p {
+        color: #cbd5e1;
+    }
+
+    .stCaption {
+        color: #94a3b8 !important;
+    }
+
+
+    /* ========================================================
+       SIDEBAR
+       ======================================================== */
+
+    section[data-testid="stSidebar"] {
+        background:
+            linear-gradient(
+                180deg,
+                #08111f 0%,
+                #070c16 100%
+            );
+        border-right: 1px solid #1e293b;
+    }
+
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #f8fafc !important;
+    }
+
+    section[data-testid="stSidebar"] p {
+        color: #94a3b8;
+    }
+
+
+    /* ========================================================
+       SELECTBOXES / RADIO / SLIDER
+       ======================================================== */
+
+    div[data-baseweb="select"] > div {
+        background-color: #0f172a;
+        border-color: #334155;
+        border-radius: 9px;
+    }
+
+    div[data-baseweb="select"] > div:hover {
+        border-color: #3b82f6;
+    }
+
+    div[role="radiogroup"] label {
+        color: #cbd5e1;
+    }
+
+
+    /* ========================================================
+       CHAT MESSAGES
+       ======================================================== */
+
+    div[data-testid="stChatMessage"] {
+        border-radius: 14px;
+        margin-bottom: 0.75rem;
+    }
+
+    div[data-testid="stChatMessage"]:has(
+        div[data-testid="chatAvatarIcon-user"]
+    ) {
+        background-color: #101c31;
+        border: 1px solid #1d3b63;
+        box-shadow:
+            0 4px 18px rgba(0, 0, 0, 0.18);
+    }
+
+    div[data-testid="stChatMessage"]:has(
+        div[data-testid="chatAvatarIcon-assistant"]
+    ) {
+        background-color: #0d1626;
+        border: 1px solid #1e293b;
+        box-shadow:
+            0 4px 18px rgba(0, 0, 0, 0.14);
+    }
+
+
+    /* ========================================================
+       CHAT INPUT
+       ======================================================== */
+
+    div[data-testid="stChatInput"] {
+        background-color: #0d1728;
+        border: 1px solid #334155;
+        border-radius: 14px;
+        box-shadow:
+            0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    div[data-testid="stChatInput"]:focus-within {
+        border-color: #3b82f6;
+        box-shadow:
+            0 0 0 1px #3b82f6,
+            0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+
+    /* ========================================================
+       METRICS
+       ======================================================== */
+
+    div[data-testid="stMetric"] {
+        background-color: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 12px;
+        padding: 1rem;
+    }
+
+    div[data-testid="stMetric"] label {
+        color: #94a3b8 !important;
+    }
+
+    div[data-testid="stMetricValue"] {
+        color: #f8fafc !important;
+    }
+
+
+    /* ========================================================
+       BUTTONS
+       ======================================================== */
+
+    .stButton > button {
+        background-color: #111827;
+        color: #cbd5e1;
+        border: 1px solid #334155;
+        border-radius: 9px;
+        transition: all 0.15s ease;
+    }
+
+    .stButton > button:hover {
+        background-color: #172554;
+        border-color: #3b82f6;
+        color: #ffffff;
+    }
+
+
+    /* ========================================================
+       DIVIDERS
+       ======================================================== */
+
+    hr {
+        border-color: #1e293b;
+    }
+
+
+    /* ========================================================
+       LINKS
+       ======================================================== */
+
+    a {
+        color: #60a5fa !important;
+    }
+
+    a:hover {
+        color: #93c5fd !important;
+    }
+
+
+    /* ========================================================
+       ALERTS
+       ======================================================== */
+
+    div[data-testid="stAlert"] {
+        border-radius: 10px;
+    }
+
+
+    /* ========================================================
+       SCROLLBAR
+       ======================================================== */
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #070c16;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #24344d;
+        border-radius: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #334d73;
+    }
+
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+
 
 # ============================================================
 # HEADER
