@@ -442,33 +442,13 @@ The current conditions are relatively
                 # ---------------------------------------------
 
                 with st.spinner(
-                    "🤖 Generating intelligence..."
-                ):
+    "🤖 Generating intelligence..."
+):
 
-                    if (
-                        answer_mode
-                        == "⚡ Smart Concise Intelligence"
-                    ):
-
-                        answer = (
-                            generate_intelligence(
-                                question=question,
-                                articles=relevant_articles,
-                                location=location,
-                                topic=topic,
-                            )
-                        )
-
-                    else:
-
-                        answer = (
-                            generate_intelligence(
-                                question=question,
-                                articles=relevant_articles,
-                                location=location,
-                                topic=topic,
-                            )
-                        )
+    answer = generate_intelligence(
+        question,
+        relevant_articles,
+    )
 
                 # ---------------------------------------------
                 # Display answer
