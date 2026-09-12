@@ -12,7 +12,6 @@ from ai import generate_intelligence
 # Page Configuration
 # --------------------------------------------------
 
-
 st.set_page_config(
     page_title="Real-Time Intelligence Platform",
     page_icon="🛰️",
@@ -86,21 +85,21 @@ def extract_weather_location(question):
     question = question.strip()
 
     patterns = [
-    r"weather\s+(?:in|at|for|of)\s+(.+)",
-    r"temperature\s+(?:in|at|for|of)\s+(.+)",
-    r"forecast\s+(?:in|at|for|of)\s+(.+)",
-    r"rain\s+(?:in|at|for|of)\s+(.+)",
-    r"humidity\s+(?:in|at|for|of)\s+(.+)",
-    r"wind\s+(?:in|at|for|of)\s+(.+)",
-    r"hot\s+(?:in|at|for|of)\s+(.+)",
-    r"cold\s+(?:in|at|for|of)\s+(.+)",
-    r"sunny\s+(?:in|at|for|of)\s+(.+)",
-    r"cloudy\s+(?:in|at|for|of)\s+(.+)",
-    r"raining\s+(?:in|at|for|of)\s+(.+)",
-    r"snow\s+(?:in|at|for|of)\s+(.+)",
-    r"how hot\s+(?:is|in|at)\s+(.+)",
-    r"how cold\s+(?:is|in|at)\s+(.+)",
-]
+        r"weather\s+(?:in|at|for|of)\s+(.+)",
+        r"temperature\s+(?:in|at|for|of)\s+(.+)",
+        r"forecast\s+(?:in|at|for|of)\s+(.+)",
+        r"rain\s+(?:in|at|for|of)\s+(.+)",
+        r"humidity\s+(?:in|at|for|of)\s+(.+)",
+        r"wind\s+(?:in|at|for|of)\s+(.+)",
+        r"hot\s+(?:in|at|for|of)\s+(.+)",
+        r"cold\s+(?:in|at|for|of)\s+(.+)",
+        r"sunny\s+(?:in|at|for|of)\s+(.+)",
+        r"cloudy\s+(?:in|at|for|of)\s+(.+)",
+        r"raining\s+(?:in|at|for|of)\s+(.+)",
+        r"snow\s+(?:in|at|for|of)\s+(.+)",
+        r"how hot\s+(?:is|in|at)\s+(.+)",
+        r"how cold\s+(?:is|in|at)\s+(.+)",
+    ]
 
     for pattern in patterns:
 
@@ -114,7 +113,6 @@ def extract_weather_location(question):
 
             location = match.group(1)
 
-            # Remove punctuation
             location = location.strip(
                 " ?!.,"
             )
@@ -147,7 +145,7 @@ if question:
         st.write(question)
 
 
-       # ----------------------------------------------
+    # ----------------------------------------------
     # Detect question type
     # ----------------------------------------------
 
@@ -178,6 +176,7 @@ if question:
         keyword in question.lower()
         for keyword in weather_keywords
     )
+
 
     # ==============================================
     # WEATHER QUESTION
@@ -227,62 +226,80 @@ if question:
 
 
                 # ----------------------------------
-                # Display location
+                # Get weather values
                 # ----------------------------------
 
-              temperature = current["temperature_2m"]
-humidity = current["relative_humidity_2m"]
-wind = current["wind_speed_10m"]
+                temperature = current[
+                    "temperature_2m"
+                ]
+
+                humidity = current[
+                    "relative_humidity_2m"
+                ]
+
+                wind = current[
+                    "wind_speed_10m"
+                ]
 
 
-# ----------------------------------
-# Describe temperature
-# ----------------------------------
+                # ----------------------------------
+                # Describe temperature
+                # ----------------------------------
 
-if temperature >= 35:
-    temperature_description = "very hot"
+                if temperature >= 35:
 
-elif temperature >= 30:
-    temperature_description = "hot"
+                    temperature_description = "very hot"
 
-elif temperature >= 25:
-    temperature_description = "warm"
+                elif temperature >= 30:
 
-elif temperature >= 18:
-    temperature_description = "mild"
+                    temperature_description = "hot"
 
-elif temperature >= 10:
-    temperature_description = "cool"
+                elif temperature >= 25:
 
-else:
-    temperature_description = "cold"
+                    temperature_description = "warm"
 
+                elif temperature >= 18:
 
-# ----------------------------------
-# Describe wind
-# ----------------------------------
+                    temperature_description = "mild"
 
-if wind >= 30:
-    wind_description = "strong wind"
+                elif temperature >= 10:
 
-elif wind >= 15:
-    wind_description = "moderate wind"
+                    temperature_description = "cool"
 
-else:
-    wind_description = "light wind"
+                else:
+
+                    temperature_description = "cold"
 
 
-# ----------------------------------
-# Natural weather answer
-# ----------------------------------
+                # ----------------------------------
+                # Describe wind
+                # ----------------------------------
 
-st.markdown(
-    f"""
-🌦️ **{location.title()}:** {temperature}°C with
-{humidity}% humidity and {wind_description}.
-The current conditions are relatively {temperature_description}.
+                if wind >= 30:
+
+                    wind_description = "strong wind"
+
+                elif wind >= 15:
+
+                    wind_description = "moderate wind"
+
+                else:
+
+                    wind_description = "light wind"
+
+
+                # ----------------------------------
+                # Natural Weather Answer
+                # ----------------------------------
+
+                st.markdown(
+                    f"""
+🌦️ **{location.title()}:** {temperature}°C
+with {humidity}% humidity and {wind_description}.
+The current conditions are relatively
+{temperature_description}.
 """
-)
+                )
 
 
             except Exception as e:
