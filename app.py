@@ -230,39 +230,59 @@ if question:
                 # Display location
                 # ----------------------------------
 
-                st.subheader(
-                    f"🌦️ Weather in {location.title()}"
-                )
+              temperature = current["temperature_2m"]
+humidity = current["relative_humidity_2m"]
+wind = current["wind_speed_10m"]
 
 
-                # ----------------------------------
-                # Display temperature
-                # ----------------------------------
+# ----------------------------------
+# Describe temperature
+# ----------------------------------
 
-                st.write(
-                    f"🌡️ Temperature: "
-                    f"{current['temperature_2m']} °C"
-                )
+if temperature >= 35:
+    temperature_description = "very hot"
+
+elif temperature >= 30:
+    temperature_description = "hot"
+
+elif temperature >= 25:
+    temperature_description = "warm"
+
+elif temperature >= 18:
+    temperature_description = "mild"
+
+elif temperature >= 10:
+    temperature_description = "cool"
+
+else:
+    temperature_description = "cold"
 
 
-                # ----------------------------------
-                # Display humidity
-                # ----------------------------------
+# ----------------------------------
+# Describe wind
+# ----------------------------------
 
-                st.write(
-                    f"💧 Humidity: "
-                    f"{current['relative_humidity_2m']}%"
-                )
+if wind >= 30:
+    wind_description = "strong wind"
+
+elif wind >= 15:
+    wind_description = "moderate wind"
+
+else:
+    wind_description = "light wind"
 
 
-                # ----------------------------------
-                # Display wind
-                # ----------------------------------
+# ----------------------------------
+# Natural weather answer
+# ----------------------------------
 
-                st.write(
-                    f"💨 Wind: "
-                    f"{current['wind_speed_10m']} km/h"
-                )
+st.markdown(
+    f"""
+🌦️ **{location.title()}:** {temperature}°C with
+{humidity}% humidity and {wind_description}.
+The current conditions are relatively {temperature_description}.
+"""
+)
 
 
             except Exception as e:
