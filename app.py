@@ -48,6 +48,12 @@ with st.sidebar:
         disabled=True
     )
 
+    st.checkbox(
+        "GNews",
+        value=True,
+        disabled=True
+    )
+
     st.markdown("### Intelligence")
 
     st.checkbox(
@@ -84,8 +90,13 @@ question = st.chat_input(
 
 if question:
 
+    # ----------------------------------------------
+    # Display user question
+    # ----------------------------------------------
+
     with st.chat_message("user"):
         st.write(question)
+
 
     # ----------------------------------------------
     # Detect question type
@@ -105,49 +116,70 @@ if question:
         for keyword in weather_keywords
     )
 
-    # ----------------------------------------------
-    # Weather question
-    # ----------------------------------------------
+
+    # ==============================================
+    # WEATHER QUESTION
+    # ==============================================
 
     if is_weather_question:
 
         with st.chat_message("assistant"):
 
-            with st.spinner("🌦️ Getting current weather..."):
+            try:
 
-                weather = fetch_weather(
-                    latitude=33.6844,
-                    longitude=73.0479
+                with st.spinner(
+                    "🌦️ Getting current weather..."
+                ):
+
+                    weather = fetch_weather(
+                        latitude=33.6844,
+                        longitude=73.0479
+                    )
+
+                current = weather["current"]
+
+                st.subheader(
+                    "🌦️ Current Weather"
                 )
 
-            current = weather["current"]
+                st.write(
+                    f"🌡️ Temperature: "
+                    f"{current['temperature_2m']} °C"
+                )
 
-            st.subheader("🌦️ Current Weather")
+                st.write(
+                    f"💧 Humidity: "
+                    f"{current['relative_humidity_2m']}%"
+                )
 
-            st.write(
-                f"🌡️ Temperature: "
-                f"{current['temperature_2m']} °C"
-            )
+                st.write(
+                    f"💨 Wind: "
+                    f"{current['wind_speed_10m']} km/h"
+                )
 
-            st.write(
-                f"💧 Humidity: "
-                f"{current['relative_humidity_2m']}%"
-            )
+            except Exception as e:
 
-            st.write(
-                f"💨 Wind: "
-                f"{current['wind_speed_10m']} km/h"
-            )
+                st.error(
+                    "Something went wrong while "
+                    "getting weather information."
+                )
 
-    # ----------------------------------------------
-    # News question
-    # ----------------------------------------------
+                st.exception(e)
+
+
+    # ==============================================
+    # NEWS QUESTION
+    # ==============================================
 
     else:
 
         with st.chat_message("assistant"):
 
             try:
+
+                # ----------------------------------
+                # STEP 1: Get news
+                # ----------------------------------
 
                 with st.spinner(
                     "🔎 Searching current news..."
@@ -170,11 +202,23 @@ if question:
                         + gnews_articles
                     )
 
+
+                # ----------------------------------
+                # Check articles
+                # ----------------------------------
+
                 if not articles:
+
                     st.warning(
                         "No relevant news articles were found."
                     )
+
                     st.stop()
+
+
+                # ----------------------------------
+                # STEP 2: Retrieve relevant articles
+                # ----------------------------------
 
                 with st.spinner(
                     "🧠 Finding the most relevant information..."
@@ -186,11 +230,19 @@ if question:
                         max_articles=8
                     )
 
+
                 if not relevant_articles:
+
                     st.warning(
                         "No relevant articles were found."
                     )
+
                     st.stop()
+
+
+                # ----------------------------------
+                # STEP 3: Generate AI intelligence
+                # ----------------------------------
 
                 with st.spinner(
                     "🤖 Analyzing the information..."
@@ -201,7 +253,17 @@ if question:
                         relevant_articles
                     )
 
+
+                # ----------------------------------
+                # STEP 4: Display AI answer
+                # ----------------------------------
+
                 st.markdown(answer)
+
+
+                # ----------------------------------
+                # STEP 5: Display sources
+                # ----------------------------------
 
                 st.divider()
 
@@ -235,11 +297,13 @@ if question:
                     )
 
                     if url:
+
                         st.markdown(
                             f"[Read original article]({url})"
                         )
 
                     st.divider()
+
 
             except Exception as e:
 
@@ -249,136 +313,3 @@ if question:
                 )
 
                 st.exception(e)
-
-
-            # ----------------------------------------------
-    # AI response
-    # ----------------------------------------------
-
-    with st.chat_message("assistant"):
-
-        try:
-
-            # --------------------------------------
-            # STEP 1: Get news
-            # --------------------------------------
-
-            with st.spinner(
-                "🔎 Searching current news..."
-            ):
-
-                newsdata_articles = fetch_news(
-                    query=question,
-                    language="en",
-                    limit=15
-                )
-
-                gnews_articles = fetch_gnews(
-                    query=question,
-                    language="en",
-                    max_results=10
-                )
-
-                articles = newsdata_articles + gnews_articles
-
-            if not articles:
-
-                st.warning(
-                    "No relevant news articles were found."
-                )
-
-                st.stop()
-
-            # --------------------------------------
-            # STEP 2: Retrieve relevant articles
-            # --------------------------------------
-
-            with st.spinner(
-                "🧠 Finding the most relevant information..."
-            ):
-
-                relevant_articles = retrieve_articles(
-                    articles,
-                    question,
-                    max_articles=8
-                )
-
-            if not relevant_articles:
-
-                st.warning(
-                    "No relevant articles were found."
-                )
-
-                st.stop()
-
-            # --------------------------------------
-            # STEP 3: Generate AI intelligence
-            # --------------------------------------
-
-            with st.spinner(
-                "🤖 Analyzing the information..."
-            ):
-
-                answer = generate_intelligence(
-                    question,
-                    relevant_articles
-                )
-
-            # --------------------------------------
-            # STEP 4: Display AI answer
-            # --------------------------------------
-
-            st.markdown(answer)
-
-            # --------------------------------------
-            # STEP 5: Display sources
-            # --------------------------------------
-
-            st.divider()
-
-            st.subheader("🔗 Sources")
-
-            for article in relevant_articles:
-
-                title = article.get(
-                    "title",
-                    "Untitled"
-                )
-
-                source = article.get(
-                    "source",
-                    "Unknown source"
-                )
-
-                url = article.get(
-                    "url"
-                )
-
-                published = article.get(
-                    "published",
-                    "Unknown date"
-                )
-
-                st.markdown(
-                    f"**{title}**"
-                )
-
-                st.caption(
-                    f"{source} • {published}"
-                )
-
-                if url:
-                    st.markdown(
-                        f"[Read original article]({url})"
-                    )
-
-                st.divider()
-
-        except Exception as e:
-
-            st.error(
-                "Something went wrong while processing "
-                "your question."
-            )
-
-            st.exception(e)
