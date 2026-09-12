@@ -153,8 +153,7 @@ if question:
     # Display user question
     # ----------------------------------------------
 
-    with st.chat_message("user"):
-        st.write(question)
+ 
 
 
     # ----------------------------------------------
