@@ -85,13 +85,13 @@ def extract_weather_location(question):
     question = question.strip()
 
     patterns = [
-        r"weather\s+(?:in|at|for)\s+(.+)",
-        r"temperature\s+(?:in|at|for)\s+(.+)",
-        r"forecast\s+(?:in|at|for)\s+(.+)",
-        r"rain\s+(?:in|at|for)\s+(.+)",
-        r"humidity\s+(?:in|at|for)\s+(.+)",
-        r"wind\s+(?:in|at|for)\s+(.+)",
-    ]
+    r"weather\s+(?:in|at|for|of)\s+(.+)",
+    r"temperature\s+(?:in|at|for|of)\s+(.+)",
+    r"forecast\s+(?:in|at|for|of)\s+(.+)",
+    r"rain\s+(?:in|at|for|of)\s+(.+)",
+    r"humidity\s+(?:in|at|for|of)\s+(.+)",
+    r"wind\s+(?:in|at|for|of)\s+(.+)",
+]
 
     for pattern in patterns:
 
