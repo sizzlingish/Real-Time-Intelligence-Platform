@@ -451,7 +451,7 @@ The current conditions are relatively
                     ):
 
                         answer = (
-                            generate_concise_intelligence(
+                            generate_intelligence(
                                 question=question,
                                 articles=relevant_articles,
                                 location=location,
