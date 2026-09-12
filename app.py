@@ -83,10 +83,13 @@ question = st.chat_input(
 # --------------------------------------------------
 
 if question:
+    weather = fetch_weather(
+        latitude=33.6844,
+        longitude=73.0479
+    )
 
-    # ----------------------------------------------
-    # Show user's question
-    # ----------------------------------------------
+    st.write("🌦️ Current Weather")
+    st.write(weather["current"])
 
     with st.chat_message("user"):
         st.write(question)
