@@ -94,19 +94,11 @@ with st.sidebar:
 
 
 # ============================================================
-# CHAT INPUT
-# ============================================================
-
-question = st.chat_input(
-    "Ask about the latest news..."
-)
-
-
-# ============================================================
 # WEATHER DETECTION
 # ============================================================
 
 def is_weather_question(text):
+
     weather_words = [
         "weather",
         "temperature",
@@ -133,8 +125,6 @@ def is_weather_question(text):
 
 def show_weather(question_text):
 
-    # Try to extract a likely location from common patterns.
-
     location_text = question_text.lower()
 
     prefixes = [
@@ -149,7 +139,9 @@ def show_weather(question_text):
     extracted_location = None
 
     for prefix in prefixes:
+
         if prefix in location_text:
+
             extracted_location = location_text.split(
                 prefix,
                 1
@@ -166,7 +158,9 @@ def show_weather(question_text):
 
         return
 
-    with st.spinner("🌤️ Getting weather information..."):
+    with st.spinner(
+        "🌤️ Getting weather information..."
+    ):
 
         try:
 
@@ -202,27 +196,36 @@ def show_weather(question_text):
             col1, col2, col3 = st.columns(3)
 
             with col1:
+
                 st.metric(
                     "Temperature",
-                    f"{temperature} °C"
-                    if temperature is not None
-                    else "N/A",
+                    (
+                        f"{temperature} °C"
+                        if temperature is not None
+                        else "N/A"
+                    ),
                 )
 
             with col2:
+
                 st.metric(
                     "Humidity",
-                    f"{humidity}%"
-                    if humidity is not None
-                    else "N/A",
+                    (
+                        f"{humidity}%"
+                        if humidity is not None
+                        else "N/A"
+                    ),
                 )
 
             with col3:
+
                 st.metric(
                     "Wind",
-                    f"{wind_speed} km/h"
-                    if wind_speed is not None
-                    else "N/A",
+                    (
+                        f"{wind_speed} km/h"
+                        if wind_speed is not None
+                        else "N/A"
+                    ),
                 )
 
             if weather_code is not None:
@@ -296,11 +299,16 @@ def render_sources(articles):
 # MAIN APPLICATION
 # ============================================================
 
+question = st.chat_input(
+    "Ask about the latest news..."
+)
+
+
 if question:
 
-    # --------------------------------------------------------
+    # ========================================================
     # WEATHER
-    # --------------------------------------------------------
+    # ========================================================
 
     if is_weather_question(question):
 
@@ -309,9 +317,9 @@ if question:
         st.stop()
 
 
-    # --------------------------------------------------------
-    # NEWS SEARCH
-    # --------------------------------------------------------
+    # ========================================================
+    # BUILD NEWS QUERY
+    # ========================================================
 
     if location == "Worldwide":
 
@@ -326,17 +334,14 @@ if question:
         )
 
 
-    # --------------------------------------------------------
-    # FETCH NEWS FROM MULTIPLE SOURCES
-    # --------------------------------------------------------
+    # ========================================================
+    # FETCH NEWSDATA
+    # ========================================================
 
     all_articles = []
 
     newsdata_error = None
     gnews_error = None
-
-
-    # NewsData
 
     with st.spinner(
         "📰 Searching NewsData..."
@@ -350,16 +355,20 @@ if question:
                 limit=article_limit,
             )
 
-            all_articles.extend(
-                newsdata_articles
-            )
+            if newsdata_articles:
+
+                all_articles.extend(
+                    newsdata_articles
+                )
 
         except Exception as error:
 
             newsdata_error = str(error)
 
 
-    # GNews
+    # ========================================================
+    # FETCH GNEWS
+    # ========================================================
 
     with st.spinner(
         "🌐 Searching GNews..."
@@ -373,18 +382,20 @@ if question:
                 max_results=article_limit,
             )
 
-            all_articles.extend(
-                gnews_articles
-            )
+            if gnews_articles:
+
+                all_articles.extend(
+                    gnews_articles
+                )
 
         except Exception as error:
 
             gnews_error = str(error)
 
 
-    # --------------------------------------------------------
-    # CHECK RESULTS
-    # --------------------------------------------------------
+    # ========================================================
+    # CHECK NEWS RESULTS
+    # ========================================================
 
     if not all_articles:
 
@@ -407,9 +418,9 @@ if question:
         st.stop()
 
 
-    # --------------------------------------------------------
-    # RETRIEVE MOST RELEVANT ARTICLES
-    # --------------------------------------------------------
+    # ========================================================
+    # RETRIEVE RELEVANT ARTICLES
+    # ========================================================
 
     relevant_articles = retrieve_articles(
         all_articles,
@@ -427,12 +438,11 @@ if question:
         st.stop()
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # AI INTELLIGENCE
-    # --------------------------------------------------------
+    # ========================================================
 
     st.subheader("🧠 Intelligence")
-
 
     try:
 
@@ -442,20 +452,27 @@ if question:
 
             # IMPORTANT:
             #
-            # Concise and Detailed modes are handled
-            # here.
+            # Concise mode explicitly sends:
+            # concise=True
             #
-            # The ai.py file will later receive the
-            # `concise` parameter.
-            #
-            # For now, this keeps the app compatible
-            # with the current generate_intelligence()
-            # function.
+            # Detailed mode explicitly sends:
+            # concise=False
 
-            answer = generate_intelligence(
-                question,
-                relevant_articles,
-            )
+            if answer_mode == "⚡ Smart Concise Intelligence":
+
+                answer = generate_intelligence(
+                    question,
+                    relevant_articles,
+                    concise=True,
+                )
+
+            else:
+
+                answer = generate_intelligence(
+                    question,
+                    relevant_articles,
+                    concise=False,
+                )
 
         st.markdown(answer)
 
@@ -468,22 +485,21 @@ if question:
         st.stop()
 
 
-    # --------------------------------------------------------
-    # VISUALIZATIONS
-    # --------------------------------------------------------
+    # ========================================================
+    # VISUAL INTELLIGENCE
+    # ========================================================
     #
     # IMPORTANT:
     #
-    # Charts are intentionally OUTSIDE the answer_mode
-    # condition.
+    # This is NOT inside an answer-mode condition.
     #
-    # Therefore charts can appear in BOTH:
+    # Therefore the visualization system runs for:
     #
     # ⚡ Concise
     # 📄 Detailed
     #
     # The visualization system itself decides whether
-    # a chart is useful.
+    # a chart is meaningful.
     #
 
     st.divider()
@@ -501,7 +517,6 @@ if question:
                 question,
                 max_graphs=3,
             )
-
 
         if visualization_result:
 
@@ -523,13 +538,13 @@ if question:
         )
 
 
-    # --------------------------------------------------------
+    # ========================================================
     # SOURCES
-    # --------------------------------------------------------
+    # ========================================================
     #
     # Sources are also outside the answer-mode condition.
     #
-    # Therefore BOTH modes show sources.
+    # Both Concise and Detailed receive sources.
     #
 
     st.divider()
