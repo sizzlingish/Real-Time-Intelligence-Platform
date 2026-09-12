@@ -1,4 +1,3 @@
-```python
 import os
 
 from google import genai
@@ -275,4 +274,4 @@ by the supplied news.
 
 
     return answer.strip()
-```
+
