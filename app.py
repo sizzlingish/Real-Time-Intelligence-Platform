@@ -438,23 +438,22 @@ The current conditions are relatively
                     st.stop()
 
                 # ---------------------------------------------
-                # Generate AI answer
-                # ---------------------------------------------
+# Generate AI answer
+# ---------------------------------------------
 
-                with st.spinner(
+with st.spinner(
     "🤖 Generating intelligence..."
 ):
-
     answer = generate_intelligence(
         question,
         relevant_articles,
     )
 
-                # ---------------------------------------------
-                # Display answer
-                # ---------------------------------------------
+# ---------------------------------------------
+# Display answer
+# ---------------------------------------------
 
-                st.markdown(answer)
+st.markdown(answer)
 
                 # ---------------------------------------------
                 # Visualization
