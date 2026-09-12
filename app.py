@@ -1,6 +1,7 @@
 import streamlit as st
 
 from news_api import fetch_news
+from gnews_api import fetch_gnews
 from retrieval import retrieve_articles
 from ai import generate_intelligence
 
