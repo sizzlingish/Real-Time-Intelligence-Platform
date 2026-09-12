@@ -1,4 +1,3 @@
-```python
 import re
 import streamlit as st
 
@@ -446,4 +445,3 @@ The current conditions are relatively
                 )
 
                 st.exception(e)
-```
