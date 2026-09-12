@@ -90,7 +90,8 @@ if question:
     with st.chat_message("user"):
         st.write(question)
 
-    # ----------------------------------------------
+
+            # ----------------------------------------------
     # AI response
     # ----------------------------------------------
 
@@ -106,19 +107,19 @@ if question:
                 "🔎 Searching current news..."
             ):
 
-              newsdata_articles = fetch_news(
-    query=question,
-    language="en",
-    limit=15
-)
+                newsdata_articles = fetch_news(
+                    query=question,
+                    language="en",
+                    limit=15
+                )
 
-gnews_articles = fetch_gnews(
-    query=question,
-    language="en",
-    max_results=10
-)
+                gnews_articles = fetch_gnews(
+                    query=question,
+                    language="en",
+                    max_results=10
+                )
 
-articles = newsdata_articles + gnews_articles
+                articles = newsdata_articles + gnews_articles
 
             if not articles:
 
