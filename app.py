@@ -1,3 +1,4 @@
+import re
 import streamlit as st
 
 from news_api import fetch_news
@@ -76,6 +77,52 @@ with st.sidebar:
 
 
 # --------------------------------------------------
+# Extract Location From Weather Question
+# --------------------------------------------------
+
+def extract_weather_location(question):
+
+    question = question.strip()
+
+    patterns = [
+        r"weather\s+(?:in|at|for|of)\s+(.+)",
+        r"temperature\s+(?:in|at|for|of)\s+(.+)",
+        r"forecast\s+(?:in|at|for|of)\s+(.+)",
+        r"rain\s+(?:in|at|for|of)\s+(.+)",
+        r"humidity\s+(?:in|at|for|of)\s+(.+)",
+        r"wind\s+(?:in|at|for|of)\s+(.+)",
+        r"hot\s+(?:in|at|for|of)\s+(.+)",
+        r"cold\s+(?:in|at|for|of)\s+(.+)",
+        r"sunny\s+(?:in|at|for|of)\s+(.+)",
+        r"cloudy\s+(?:in|at|for|of)\s+(.+)",
+        r"raining\s+(?:in|at|for|of)\s+(.+)",
+        r"snow\s+(?:in|at|for|of)\s+(.+)",
+        r"how hot\s+(?:is|in|at)\s+(.+)",
+        r"how cold\s+(?:is|in|at)\s+(.+)",
+    ]
+
+    for pattern in patterns:
+
+        match = re.search(
+            pattern,
+            question,
+            re.IGNORECASE
+        )
+
+        if match:
+
+            location = match.group(1)
+
+            location = location.strip(
+                " ?!.,"
+            )
+
+            return location
+
+    return None
+
+
+# --------------------------------------------------
 # Chat Input
 # --------------------------------------------------
 
@@ -107,8 +154,22 @@ if question:
         "temperature",
         "forecast",
         "rain",
+        "raining",
         "wind",
-        "humidity"
+        "windy",
+        "humidity",
+        "hot",
+        "cold",
+        "heat",
+        "snow",
+        "snowing",
+        "sunny",
+        "cloudy",
+        "storm",
+        "stormy",
+        "degrees",
+        "how hot",
+        "how cold"
     ]
 
     is_weather_question = any(
@@ -127,35 +188,119 @@ if question:
 
             try:
 
+                # ----------------------------------
+                # Find location
+                # ----------------------------------
+
+                location = extract_weather_location(
+                    question
+                )
+
+                if not location:
+
+                    st.warning(
+                        "Please include a city or location."
+                    )
+
+                    st.info(
+                        "Example: What is the weather in London?"
+                    )
+
+                    st.stop()
+
+
+                # ----------------------------------
+                # Get weather
+                # ----------------------------------
+
                 with st.spinner(
-                    "🌦️ Getting current weather..."
+                    f"🌦️ Getting weather for {location}..."
                 ):
 
                     weather = fetch_weather(
-                        latitude=33.6844,
-                        longitude=73.0479
+                        location=location
                     )
+
 
                 current = weather["current"]
 
-                st.subheader(
-                    "🌦️ Current Weather"
+
+                # ----------------------------------
+                # Get weather values
+                # ----------------------------------
+
+                temperature = current[
+                    "temperature_2m"
+                ]
+
+                humidity = current[
+                    "relative_humidity_2m"
+                ]
+
+                wind = current[
+                    "wind_speed_10m"
+                ]
+
+
+                # ----------------------------------
+                # Describe temperature
+                # ----------------------------------
+
+                if temperature >= 35:
+
+                    temperature_description = "very hot"
+
+                elif temperature >= 30:
+
+                    temperature_description = "hot"
+
+                elif temperature >= 25:
+
+                    temperature_description = "warm"
+
+                elif temperature >= 18:
+
+                    temperature_description = "mild"
+
+                elif temperature >= 10:
+
+                    temperature_description = "cool"
+
+                else:
+
+                    temperature_description = "cold"
+
+
+                # ----------------------------------
+                # Describe wind
+                # ----------------------------------
+
+                if wind >= 30:
+
+                    wind_description = "strong wind"
+
+                elif wind >= 15:
+
+                    wind_description = "moderate wind"
+
+                else:
+
+                    wind_description = "light wind"
+
+
+                # ----------------------------------
+                # Natural Weather Answer
+                # ----------------------------------
+
+                st.markdown(
+                    f"""
+🌦️ **{location.title()}:** {temperature}°C
+with {humidity}% humidity and {wind_description}.
+The current conditions are relatively
+{temperature_description}.
+"""
                 )
 
-                st.write(
-                    f"🌡️ Temperature: "
-                    f"{current['temperature_2m']} °C"
-                )
-
-                st.write(
-                    f"💧 Humidity: "
-                    f"{current['relative_humidity_2m']}%"
-                )
-
-                st.write(
-                    f"💨 Wind: "
-                    f"{current['wind_speed_10m']} km/h"
-                )
 
             except Exception as e:
 
