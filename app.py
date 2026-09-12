@@ -366,35 +366,53 @@ def is_weather_question(text):
     )
 
 
+
 # ============================================================
 # WEATHER RESPONSE
 # ============================================================
 
 def show_weather(question_text):
 
-    location_text = question_text.lower()
+    import re
 
-    prefixes = [
-        "what is the weather in ",
-        "what's the weather in ",
-        "weather in ",
-        "temperature in ",
-        "forecast in ",
-        "how is the weather in ",
+    text = question_text.strip()
+
+    # Try to extract the location from common weather questions.
+    patterns = [
+        r"weather\s+(?:in|at|for)\s+(.+)",
+        r"temperature\s+(?:in|at|for)\s+(.+)",
+        r"forecast\s+(?:in|at|for)\s+(.+)",
+        r"weather\s+(.+)",
+        r"temperature\s+(.+)",
+        r"forecast\s+(.+)",
+        r"how(?:'s| is)\s+the\s+weather(?:\s+like)?\s+(?:in|at|for)\s+(.+)",
+        r"what(?:'s| is)\s+the\s+weather(?:\s+like)?\s+(?:in|at|for)\s+(.+)",
     ]
 
     extracted_location = None
 
-    for prefix in prefixes:
+    for pattern in patterns:
 
-        if prefix in location_text:
+        match = re.search(
+            pattern,
+            text,
+            re.IGNORECASE
+        )
 
-            extracted_location = location_text.split(
-                prefix,
-                1
-            )[1].strip()
+        if match:
+
+            extracted_location = match.group(
+                match.lastindex
+            ).strip()
 
             break
+
+    # Remove common punctuation.
+    if extracted_location:
+
+        extracted_location = extracted_location.rstrip(
+            "?.!,"
+        ).strip()
 
     if not extracted_location:
 
