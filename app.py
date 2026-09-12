@@ -7,9 +7,9 @@ from retrieval import retrieve_articles
 from ai import generate_intelligence
 
 
-# ==================================================
-# PAGE CONFIGURATION
-# ==================================================
+# --------------------------------------------------
+# Page Configuration
+# --------------------------------------------------
 
 st.set_page_config(
     page_title="Real-Time Intelligence Platform",
@@ -18,189 +18,27 @@ st.set_page_config(
 )
 
 
-# ==================================================
-# SIMPLE COLOR / STYLE
-# ==================================================
+# --------------------------------------------------
+# Header
+# --------------------------------------------------
+
+st.title("🛰️ Real-Time Intelligence Platform")
 
 st.markdown(
     """
-    <style>
-
-    /* Overall page */
-
-    .stApp {
-        background-color: #0b1120;
-        color: #e2e8f0;
-    }
-
-
-    /* Main content */
-
-    .block-container {
-        max-width: 1100px;
-        padding-top: 2rem;
-        padding-bottom: 4rem;
-    }
-
-
-    /* Main title */
-
-    h1 {
-        color: #f8fafc !important;
-        font-weight: 700 !important;
-        letter-spacing: -0.03em;
-        white-space: nowrap;
-    }
-
-
-    /* Normal text */
-
-    p {
-        color: #cbd5e1;
-    }
-
-
-    /* Captions */
-
-    .stCaption {
-        color: #94a3b8 !important;
-    }
-
-
-    /* Sidebar */
-
-    section[data-testid="stSidebar"] {
-        background-color: #080f1d;
-        border-right: 1px solid #1e293b;
-    }
-
-
-    /* Sidebar headings */
-
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3 {
-        color: #f8fafc !important;
-    }
-
-
-    /* Chat messages */
-
-    div[data-testid="stChatMessage"] {
-        background-color: transparent;
-    }
-
-
-    /* User message */
-
-    div[data-testid="stChatMessage"]:has(
-        div[data-testid="chatAvatarIcon-user"]
-    ) {
-        background-color: #111c32;
-        border-radius: 14px;
-        border: 1px solid #1e3a5f;
-    }
-
-
-    /* Assistant message */
-
-    div[data-testid="stChatMessage"]:has(
-        div[data-testid="chatAvatarIcon-assistant"]
-    ) {
-        background-color: #0f172a;
-        border-radius: 14px;
-        border: 1px solid #1e293b;
-    }
-
-
-    /* Chat input */
-
-    div[data-testid="stChatInput"] {
-        background-color: #111827;
-        border: 1px solid #334155;
-        border-radius: 14px;
-    }
-
-
-    div[data-testid="stChatInput"]:focus-within {
-        border-color: #3b82f6;
-    }
-
-
-    /* Buttons */
-
-    .stButton > button {
-        background-color: #111827;
-        color: #cbd5e1;
-        border: 1px solid #334155;
-        border-radius: 8px;
-    }
-
-
-    .stButton > button:hover {
-        background-color: #172554;
-        border-color: #3b82f6;
-        color: #ffffff;
-    }
-
-
-    /* Metrics */
-
-    div[data-testid="stMetric"] {
-        background-color: #111827;
-        border: 1px solid #1e293b;
-        border-radius: 12px;
-        padding: 1rem;
-    }
-
-
-    /* Dividers */
-
-    hr {
-        border-color: #1e293b;
-    }
-
-
-    /* Links */
-
-    a {
-        color: #60a5fa !important;
-    }
-
-
-    </style>
-    """,
-    unsafe_allow_html=True
+    Ask questions about current events and get
+    AI-powered intelligence based on recent news.
+    """
 )
 
 
-# ==================================================
-# HEADER
-# ==================================================
-
-st.title(
-    "🛰️ Real-Time Intelligence Platform"
-)
-
-st.caption(
-    "Ask questions about current events and get "
-    "AI-powered intelligence based on recent news."
-)
-
-
-# ==================================================
-# SIDEBAR
-# ==================================================
+# --------------------------------------------------
+# Sidebar
+# --------------------------------------------------
 
 with st.sidebar:
 
-    st.header("RTIP")
-
-    st.caption(
-        "REAL-TIME INTELLIGENCE PLATFORM"
-    )
-
-    st.divider()
+    st.header("⚙️ RTIP")
 
     st.markdown("### News Sources")
 
@@ -237,80 +75,31 @@ with st.sidebar:
     )
 
 
-# ==================================================
-# CHAT HISTORY
-# ==================================================
-
-if "messages" not in st.session_state:
-
-    st.session_state.messages = []
-
-
-for message in st.session_state.messages:
-
-    with st.chat_message(
-        message["role"]
-    ):
-
-        st.markdown(
-            message["content"]
-        )
-
-
-# ==================================================
-# WELCOME
-# ==================================================
-
-if not st.session_state.messages:
-
-    st.markdown(
-        "## What is happening right now?"
-    )
-
-    st.write(
-        "Ask about world events, politics, "
-        "technology, conflicts, or breaking news."
-    )
-
-
-# ==================================================
-# CHAT INPUT
-# ==================================================
+# --------------------------------------------------
+# Chat Input
+# --------------------------------------------------
 
 question = st.chat_input(
     "Ask about current events..."
 )
 
 
-# ==================================================
-# PROCESS QUESTION
-# ==================================================
+# --------------------------------------------------
+# Process Question
+# --------------------------------------------------
 
 if question:
 
     # ----------------------------------------------
-    # Store user message
-    # ----------------------------------------------
-
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": question
-        }
-    )
-
-
-    # ----------------------------------------------
-    # User message
+    # Display user question
     # ----------------------------------------------
 
     with st.chat_message("user"):
-
-        st.markdown(question)
+        st.write(question)
 
 
     # ----------------------------------------------
-    # Detect weather
+    # Detect question type
     # ----------------------------------------------
 
     weather_keywords = [
@@ -328,9 +117,9 @@ if question:
     )
 
 
-    # ==================================================
-    # WEATHER
-    # ==================================================
+    # ==============================================
+    # WEATHER QUESTION
+    # ==============================================
 
     if is_weather_question:
 
@@ -339,7 +128,7 @@ if question:
             try:
 
                 with st.spinner(
-                    "Getting current weather..."
+                    "🌦️ Getting current weather..."
                 ):
 
                     weather = fetch_weather(
@@ -350,31 +139,23 @@ if question:
                 current = weather["current"]
 
                 st.subheader(
-                    "Current Weather"
+                    "🌦️ Current Weather"
                 )
 
-                col1, col2, col3 = st.columns(3)
+                st.write(
+                    f"🌡️ Temperature: "
+                    f"{current['temperature_2m']} °C"
+                )
 
-                with col1:
+                st.write(
+                    f"💧 Humidity: "
+                    f"{current['relative_humidity_2m']}%"
+                )
 
-                    st.metric(
-                        "Temperature",
-                        f"{current['temperature_2m']} °C"
-                    )
-
-                with col2:
-
-                    st.metric(
-                        "Humidity",
-                        f"{current['relative_humidity_2m']}%"
-                    )
-
-                with col3:
-
-                    st.metric(
-                        "Wind",
-                        f"{current['wind_speed_10m']} km/h"
-                    )
+                st.write(
+                    f"💨 Wind: "
+                    f"{current['wind_speed_10m']} km/h"
+                )
 
             except Exception as e:
 
@@ -386,9 +167,9 @@ if question:
                 st.exception(e)
 
 
-    # ==================================================
-    # NEWS
-    # ==================================================
+    # ==============================================
+    # NEWS QUESTION
+    # ==============================================
 
     else:
 
@@ -396,12 +177,12 @@ if question:
 
             try:
 
-                # --------------------------------------
-                # Get news
-                # --------------------------------------
+                # ----------------------------------
+                # STEP 1: Get news
+                # ----------------------------------
 
                 with st.spinner(
-                    "Searching current news..."
+                    "🔎 Searching current news..."
                 ):
 
                     newsdata_articles = fetch_news(
@@ -422,9 +203,9 @@ if question:
                     )
 
 
-                # --------------------------------------
+                # ----------------------------------
                 # Check articles
-                # --------------------------------------
+                # ----------------------------------
 
                 if not articles:
 
@@ -435,12 +216,12 @@ if question:
                     st.stop()
 
 
-                # --------------------------------------
-                # Retrieve
-                # --------------------------------------
+                # ----------------------------------
+                # STEP 2: Retrieve relevant articles
+                # ----------------------------------
 
                 with st.spinner(
-                    "Finding the most relevant information..."
+                    "🧠 Finding the most relevant information..."
                 ):
 
                     relevant_articles = retrieve_articles(
@@ -459,12 +240,12 @@ if question:
                     st.stop()
 
 
-                # --------------------------------------
-                # Generate intelligence
-                # --------------------------------------
+                # ----------------------------------
+                # STEP 3: Generate AI intelligence
+                # ----------------------------------
 
                 with st.spinner(
-                    "Analyzing the information..."
+                    "🤖 Analyzing the information..."
                 ):
 
                     answer = generate_intelligence(
@@ -473,27 +254,20 @@ if question:
                     )
 
 
-                # --------------------------------------
-                # Display answer
-                # --------------------------------------
-
-                st.markdown(
-                    "### 🧠 Intelligence Brief"
-                )
+                # ----------------------------------
+                # STEP 4: Display AI answer
+                # ----------------------------------
 
                 st.markdown(answer)
 
 
-                # --------------------------------------
-                # Sources
-                # --------------------------------------
+                # ----------------------------------
+                # STEP 5: Display sources
+                # ----------------------------------
 
                 st.divider()
 
-                st.subheader(
-                    "Sources"
-                )
-
+                st.subheader("🔗 Sources")
 
                 for article in relevant_articles:
 
@@ -507,15 +281,12 @@ if question:
                         "Unknown source"
                     )
 
+                    url = article.get("url")
+
                     published = article.get(
                         "published",
                         "Unknown date"
                     )
-
-                    url = article.get(
-                        "url"
-                    )
-
 
                     st.markdown(
                         f"**{title}**"
@@ -525,14 +296,11 @@ if question:
                         f"{source} • {published}"
                     )
 
-
                     if url:
 
-                        st.link_button(
-                            "Read original article",
-                            url
+                        st.markdown(
+                            f"[Read original article]({url})"
                         )
-
 
                     st.divider()
 
@@ -540,9 +308,8 @@ if question:
             except Exception as e:
 
                 st.error(
-                    "Something went wrong while "
-                    "processing your question."
+                    "Something went wrong while processing "
+                    "your question."
                 )
 
                 st.exception(e)
-
