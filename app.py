@@ -1,3 +1,4 @@
+import re
 import streamlit as st
 
 from news_api import fetch_news
@@ -76,6 +77,45 @@ with st.sidebar:
 
 
 # --------------------------------------------------
+# Extract Location From Weather Question
+# --------------------------------------------------
+
+def extract_weather_location(question):
+
+    question = question.strip()
+
+    patterns = [
+        r"weather\s+(?:in|at|for)\s+(.+)",
+        r"temperature\s+(?:in|at|for)\s+(.+)",
+        r"forecast\s+(?:in|at|for)\s+(.+)",
+        r"rain\s+(?:in|at|for)\s+(.+)",
+        r"humidity\s+(?:in|at|for)\s+(.+)",
+        r"wind\s+(?:in|at|for)\s+(.+)",
+    ]
+
+    for pattern in patterns:
+
+        match = re.search(
+            pattern,
+            question,
+            re.IGNORECASE
+        )
+
+        if match:
+
+            location = match.group(1)
+
+            # Remove punctuation
+            location = location.strip(
+                " ?!.,"
+            )
+
+            return location
+
+    return None
+
+
+# --------------------------------------------------
 # Chat Input
 # --------------------------------------------------
 
@@ -127,35 +167,81 @@ if question:
 
             try:
 
+                # ----------------------------------
+                # Find location
+                # ----------------------------------
+
+                location = extract_weather_location(
+                    question
+                )
+
+                if not location:
+
+                    st.warning(
+                        "Please include a city or location."
+                    )
+
+                    st.info(
+                        "Example: What is the weather in London?"
+                    )
+
+                    st.stop()
+
+
+                # ----------------------------------
+                # Get weather
+                # ----------------------------------
+
                 with st.spinner(
-                    "🌦️ Getting current weather..."
+                    f"🌦️ Getting weather for {location}..."
                 ):
 
                     weather = fetch_weather(
-                        latitude=33.6844,
-                        longitude=73.0479
+                        location=location
                     )
+
 
                 current = weather["current"]
 
+
+                # ----------------------------------
+                # Display location
+                # ----------------------------------
+
                 st.subheader(
-                    "🌦️ Current Weather"
+                    f"🌦️ Weather in {location.title()}"
                 )
+
+
+                # ----------------------------------
+                # Display temperature
+                # ----------------------------------
 
                 st.write(
                     f"🌡️ Temperature: "
                     f"{current['temperature_2m']} °C"
                 )
 
+
+                # ----------------------------------
+                # Display humidity
+                # ----------------------------------
+
                 st.write(
                     f"💧 Humidity: "
                     f"{current['relative_humidity_2m']}%"
                 )
 
+
+                # ----------------------------------
+                # Display wind
+                # ----------------------------------
+
                 st.write(
                     f"💨 Wind: "
                     f"{current['wind_speed_10m']} km/h"
                 )
+
 
             except Exception as e:
 
