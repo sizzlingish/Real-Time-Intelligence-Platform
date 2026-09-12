@@ -12,6 +12,7 @@ from ai import generate_intelligence
 # Page Configuration
 # --------------------------------------------------
 
+
 st.set_page_config(
     page_title="Real-Time Intelligence Platform",
     page_icon="🛰️",
