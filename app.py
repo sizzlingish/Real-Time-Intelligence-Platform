@@ -91,6 +91,14 @@ def extract_weather_location(question):
     r"rain\s+(?:in|at|for|of)\s+(.+)",
     r"humidity\s+(?:in|at|for|of)\s+(.+)",
     r"wind\s+(?:in|at|for|of)\s+(.+)",
+    r"hot\s+(?:in|at|for|of)\s+(.+)",
+    r"cold\s+(?:in|at|for|of)\s+(.+)",
+    r"sunny\s+(?:in|at|for|of)\s+(.+)",
+    r"cloudy\s+(?:in|at|for|of)\s+(.+)",
+    r"raining\s+(?:in|at|for|of)\s+(.+)",
+    r"snow\s+(?:in|at|for|of)\s+(.+)",
+    r"how hot\s+(?:is|in|at)\s+(.+)",
+    r"how cold\s+(?:is|in|at)\s+(.+)",
 ]
 
     for pattern in patterns:
@@ -142,20 +150,33 @@ if question:
     # Detect question type
     # ----------------------------------------------
 
-    weather_keywords = [
-        "weather",
-        "temperature",
-        "forecast",
-        "rain",
-        "wind",
-        "humidity"
-    ]
+  weather_keywords = [
+    "weather",
+    "temperature",
+    "forecast",
+    "rain",
+    "raining",
+    "wind",
+    "windy",
+    "humidity",
+    "hot",
+    "cold",
+    "heat",
+    "snow",
+    "snowing",
+    "sunny",
+    "cloudy",
+    "storm",
+    "stormy",
+    "degrees",
+    "how hot",
+    "how cold"
+]
 
-    is_weather_question = any(
-        keyword in question.lower()
-        for keyword in weather_keywords
-    )
-
+is_weather_question = any(
+    keyword in question.lower()
+    for keyword in weather_keywords
+)
 
     # ==============================================
     # WEATHER QUESTION
