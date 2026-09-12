@@ -191,28 +191,30 @@ def retrieve_articles(
     question,
     max_articles=8
 ):
-    """
-    Complete retrieval pipeline.
-
-    Steps:
-    1. Remove invalid articles
-    2. Remove duplicates
-    3. Rank by relevance
-    4. Return top articles
-    """
-
     if not articles:
         return []
-
-    # ------------------------------------------
-    # Remove articles without titles
-    # ------------------------------------------
 
     valid_articles = [
         article
         for article in articles
         if article.get("title")
     ]
+
+    if not valid_articles:
+        return []
+
+    unique_articles = remove_duplicates(valid_articles)
+    ranked_articles = rank_articles(
+        unique_articles,
+        question
+    )
+
+    # Always return the best available articles.
+    # Do not discard them just because the keyword
+    # relevance score is low.
+    selected_articles = ranked_articles[:max_articles]
+
+    return selected_articles
 
     # ------------------------------------------
     # Remove duplicates
