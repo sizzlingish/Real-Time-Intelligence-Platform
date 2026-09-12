@@ -274,7 +274,7 @@ st.markdown(
 # HEADER
 # ============================================================
 
-st.title("🛰️ Real-Time Intelligence Platform")
+st.title("Real-Time Intelligence Platform")
 
 st.caption(
     "Ask about the latest news, compare sources, explore developments, "
