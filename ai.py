@@ -133,14 +133,36 @@ def generate_intelligence(
     if concise:
 
         prompt = f"""
-You are the AI intelligence analyst for
-the Real-Time Intelligence Platform (RTIP).
+You are the AI intelligence analyst for RTIP.
 
-The user asked:
-
+User question:
 "{question}"
 
-Use ONLY the supplied news articles as evidence.
+Use ONLY the supplied news articles.
+
+NEWS DATA:
+{news_context}
+
+STRICT CONCISE MODE:
+
+Answer in EXACTLY 3 or 4 short lines.
+
+Rules:
+- Directly answer the user's question.
+- Include only the most important information.
+- Mention the latest development if relevant.
+- Do not use headings.
+- Do not use bullet points.
+- Do not explain background.
+- Do not add "Why It Matters".
+- Do not add a source comparison section.
+- Do not repeat information.
+- Do not write more than 4 lines.
+- Do not exceed 70 words.
+- Do not invent facts.
+
+Return ONLY the 3-4 line answer.
+"""
 
 ================ NEWS DATA ================
 
