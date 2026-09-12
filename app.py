@@ -1,3 +1,4 @@
+```python
 import re
 import streamlit as st
 
@@ -5,8 +6,8 @@ from news_api import fetch_news
 from gnews_api import fetch_gnews
 from open_meteo_api import fetch_weather
 from retrieval import retrieve_articles
-
 from ai import generate_intelligence
+
 from visualization import (
     generate_visualizations,
     render_visualizations_in_streamlit,
@@ -14,10 +15,61 @@ from visualization import (
 
 
 st.set_page_config(
-    page_title="RTIP - Real-Time Intelligence Platform",
+    page_title="Real-Time Intelligence Platform",
     page_icon="🛰️",
     layout="wide",
 )
+
+
+st.title("🛰️ Real-Time Intelligence Platform")
+
+st.markdown(
+    """
+    Ask questions about current events and get
+    AI-powered intelligence based on recent news.
+    """
+)
+
+
+with st.sidebar:
+    st.header("⚙️ RTIP")
+
+    st.markdown("### News Sources")
+    st.checkbox(
+        "NewsData.io",
+        value=True,
+        disabled=True,
+    )
+
+    st.checkbox(
+        "GNews",
+        value=True,
+        disabled=True,
+    )
+
+    st.markdown("### Intelligence")
+    st.checkbox(
+        "Source comparison",
+        value=True,
+        disabled=True,
+    )
+
+    st.checkbox(
+        "Conflict detection",
+        value=True,
+        disabled=True,
+    )
+
+    st.markdown("### Visualization")
+    st.checkbox(
+        "Auto-generated graphs",
+        value=True,
+        disabled=True,
+    )
+
+    st.divider()
+
+    st.caption("Real-Time Intelligence Platform")
 
 
 # ---------------------------------------------------------
@@ -48,21 +100,40 @@ def extract_weather_location(question):
         match = re.search(
             pattern,
             question,
-            re.IGNORECASE
+            re.IGNORECASE,
         )
 
         if match:
             location = match.group(1)
-            return location.strip(" ?!.,")
-    
+            location = location.strip(" ?!.,")
+            return location
+
     return None
 
 
 # ---------------------------------------------------------
-# WEATHER DETECTION
+# USER INPUT
 # ---------------------------------------------------------
 
-def is_weather_question(question):
+question = st.chat_input(
+    "Ask about current events..."
+)
+
+
+if question:
+
+    # -----------------------------------------------------
+    # SHOW USER MESSAGE
+    # -----------------------------------------------------
+
+    with st.chat_message("user"):
+        st.write(question)
+
+
+    # -----------------------------------------------------
+    # WEATHER DETECTION
+    # -----------------------------------------------------
+
     weather_keywords = [
         "weather",
         "temperature",
@@ -74,6 +145,7 @@ def is_weather_question(question):
         "humidity",
         "hot",
         "cold",
+        "heat",
         "snow",
         "snowing",
         "sunny",
@@ -81,194 +153,52 @@ def is_weather_question(question):
         "storm",
         "stormy",
         "degrees",
+        "how hot",
+        "how cold",
     ]
 
-    question_lower = question.lower()
 
-    return any(
-        re.search(
-            rf"\b{re.escape(keyword)}\b",
-            question_lower
-        )
+    is_weather_question = any(
+        keyword in question.lower()
         for keyword in weather_keywords
     )
 
 
-# ---------------------------------------------------------
-# SOURCE DISPLAY
-# ---------------------------------------------------------
+    # =====================================================
+    # WEATHER BRANCH
+    # =====================================================
 
-def render_sources(articles):
-    st.subheader("🔗 Important Sources")
+    if is_weather_question:
 
-    for article in articles:
-        title = article.get(
-            "title",
-            "Untitled"
-        )
+        with st.chat_message("assistant"):
 
-        source = article.get(
-            "source",
-            "Unknown source"
-        )
+            try:
 
-        published = article.get(
-            "published",
-            "Unknown date"
-        )
-
-        url = article.get(
-            "url",
-            ""
-        )
-
-        st.markdown(f"**{title}**")
-        st.caption(
-            f"{source} • {published}"
-        )
-
-        if url:
-            st.markdown(
-                f"[Read original article]({url})"
-            )
-
-        st.divider()
-
-
-# ---------------------------------------------------------
-# PAGE HEADER
-# ---------------------------------------------------------
-
-st.title(
-    "🛰️ Real-Time Intelligence Platform"
-)
-
-st.write(
-    "Ask about current events and receive "
-    "AI-powered intelligence from recent news."
-)
-
-
-# ---------------------------------------------------------
-# SIDEBAR
-# ---------------------------------------------------------
-
-with st.sidebar:
-
-    st.header("⚙️ RTIP Settings")
-
-    # Location
-    location = st.selectbox(
-        "Select Location",
-        [
-            "Worldwide",
-            "Pakistan",
-            "India",
-            "United States",
-            "United Kingdom",
-            "China",
-            "Hyderabad, Pakistan",
-            "Karachi, Pakistan",
-            "Islamabad, Pakistan",
-        ],
-    )
-
-    # Topic
-    topic = st.selectbox(
-        "Select Topic",
-        [
-            "Artificial Intelligence",
-            "Technology",
-            "Politics",
-            "Business",
-            "Education",
-            "Health",
-            "Sports",
-            "Climate",
-            "Cybersecurity",
-            "World News",
-        ],
-    )
-
-    # Answer mode
-    answer_mode = st.radio(
-        "Answer Mode",
-        [
-            "⚡ Smart Concise Intelligence",
-            "📄 Detailed Intelligence Report",
-        ],
-    )
-
-    # Article limit
-    article_limit = st.slider(
-        "Articles to retrieve",
-        min_value=5,
-        max_value=20,
-        value=15,
-    )
-
-    st.divider()
-
-    st.caption(
-        "Real-Time Intelligence Platform"
-    )
-
-
-# ---------------------------------------------------------
-# CHAT INPUT
-# ---------------------------------------------------------
-
-question = st.chat_input(
-    "Ask a question about current events..."
-)
-
-
-# ---------------------------------------------------------
-# PROCESS QUESTION
-# ---------------------------------------------------------
-
-if question:
-
-    # Show user message
-    with st.chat_message("user"):
-        st.write(question)
-
-    # Assistant response
-    with st.chat_message("assistant"):
-
-        try:
-
-            # =================================================
-            # WEATHER BRANCH
-            # =================================================
-
-            if is_weather_question(question):
-
-                location_from_question = (
-                    extract_weather_location(question)
+                location = extract_weather_location(
+                    question
                 )
 
-                if not location_from_question:
+                if not location:
 
                     st.warning(
                         "Please include a city or location."
                     )
 
                     st.info(
-                        "Example: "
-                        "What is the weather in London?"
+                        "Example: What is the weather in London?"
                     )
 
                     st.stop()
 
+
                 with st.spinner(
-                    f"🌦️ Getting weather for "
-                    f"{location_from_question}..."
+                    f"🌦️ Getting weather for {location}..."
                 ):
 
                     weather = fetch_weather(
-                        location=location_from_question
+                        location=location
                     )
+
 
                 current = weather["current"]
 
@@ -284,138 +214,123 @@ if question:
                     "wind_speed_10m"
                 ]
 
+
+                # Temperature description
+
                 if temperature >= 35:
-                    temperature_description = (
-                        "very hot"
-                    )
+                    temperature_description = "very hot"
 
                 elif temperature >= 30:
-                    temperature_description = (
-                        "hot"
-                    )
+                    temperature_description = "hot"
 
                 elif temperature >= 25:
-                    temperature_description = (
-                        "warm"
-                    )
+                    temperature_description = "warm"
 
                 elif temperature >= 18:
-                    temperature_description = (
-                        "mild"
-                    )
+                    temperature_description = "mild"
 
                 elif temperature >= 10:
-                    temperature_description = (
-                        "cool"
-                    )
+                    temperature_description = "cool"
 
                 else:
-                    temperature_description = (
-                        "cold"
-                    )
+                    temperature_description = "cold"
+
+
+                # Wind description
 
                 if wind >= 30:
-                    wind_description = (
-                        "strong wind"
-                    )
+                    wind_description = "strong wind"
 
                 elif wind >= 15:
-                    wind_description = (
-                        "moderate wind"
-                    )
+                    wind_description = "moderate wind"
 
                 else:
-                    wind_description = (
-                        "light wind"
-                    )
+                    wind_description = "light wind"
+
 
                 st.markdown(
                     f"""
-🌦️ **{location_from_question.title()}:**
+🌦️ **{location.title()}:**
 {temperature}°C with {humidity}% humidity
 and {wind_description}.
 
 The current conditions are relatively
-**{temperature_description}**.
+{temperature_description}.
 """
                 )
 
-            # =================================================
-            # NEWS BRANCH
-            # =================================================
 
-            else:
+            except Exception:
 
-                # ---------------------------------------------
-                # Build news search query
-                # ---------------------------------------------
+                st.error(
+                    "Something went wrong while "
+                    "getting weather information."
+                )
 
-                if location == "Worldwide":
-
-                    search_query = (
-                        f"{topic} {question}"
+                st.exception(
+                    Exception(
+                        "Weather request failed."
                     )
+                )
 
-                else:
 
-                    search_query = (
-                        f"{location} "
-                        f"{topic} "
-                        f"{question}"
-                    )
+    # =====================================================
+    # NEWS BRANCH
+    # =====================================================
 
-                # ---------------------------------------------
-                # Fetch NewsData
-                # ---------------------------------------------
+    else:
+
+        with st.chat_message("assistant"):
+
+            try:
+
+                # -------------------------------------------------
+                # STEP 1 — FETCH NEWS
+                # -------------------------------------------------
 
                 with st.spinner(
                     "🔎 Searching current news..."
                 ):
 
                     newsdata_articles = fetch_news(
-                        query=search_query,
+                        query=question,
                         language="en",
-                        limit=article_limit,
+                        limit=15,
                     )
 
-                # ---------------------------------------------
-                # Fetch GNews
-                # ---------------------------------------------
-
-                with st.spinner(
-                    "🌐 Checking additional news sources..."
-                ):
 
                     gnews_articles = fetch_gnews(
-                        query=search_query,
+                        query=question,
                         language="en",
-                        max_results=article_limit,
+                        max_results=10,
                     )
 
-                # ---------------------------------------------
-                # Combine sources
-                # ---------------------------------------------
 
-                articles = (
-                    newsdata_articles
-                    + gnews_articles
-                )
+                    articles = (
+                        newsdata_articles
+                        + gnews_articles
+                    )
+
+
+                # -------------------------------------------------
+                # CHECK RESULTS
+                # -------------------------------------------------
 
                 if not articles:
 
                     st.warning(
-                        "No news articles were returned "
-                        "by the news sources."
+                        "No relevant news articles were found."
                     )
 
                     st.stop()
 
-                # ---------------------------------------------
-                # Retrieval / ranking / deduplication
-                # ---------------------------------------------
+
+                # -------------------------------------------------
+                # STEP 2 — RETRIEVE RELEVANT ARTICLES
+                # -------------------------------------------------
 
                 with st.spinner(
-                    "🧠 Selecting the most relevant articles..."
+                    "🧠 Finding the most relevant information..."
                 ):
 
                     relevant_articles = retrieve_articles(
@@ -424,99 +339,111 @@ The current conditions are relatively
                         max_articles=8,
                     )
 
-                # Safety fallback
-                if not relevant_articles:
-
-                    relevant_articles = articles[:8]
 
                 if not relevant_articles:
 
                     st.warning(
-                        "No relevant news articles were found."
+                        "No relevant articles were found."
                     )
 
                     st.stop()
 
-                # ---------------------------------------------
-                # Generate AI answer
-                # ---------------------------------------------
+
+                # -------------------------------------------------
+                # STEP 3 — GEMINI INTELLIGENCE
+                # -------------------------------------------------
 
                 with st.spinner(
-                    "🤖 Generating intelligence..."
+                    "🤖 Analyzing the information..."
                 ):
 
-                    if (
-                        answer_mode
-                        == "⚡ Smart Concise Intelligence"
-                    ):
+                    answer = generate_intelligence(
+                        question,
+                        relevant_articles,
+                    )
 
-                        answer = (
-                            generate_intelligence(
-                                question=question,
-                                articles=relevant_articles,
-                                location=location,
-                                topic=topic,
-                            )
-                        )
 
-                    else:
-
-                        answer = (
-                            generate_intelligence(
-                                question=question,
-                                articles=relevant_articles,
-                                location=location,
-                                topic=topic,
-                            )
-                        )
-
-                # ---------------------------------------------
-                # Display answer
-                # ---------------------------------------------
+                # -------------------------------------------------
+                # STEP 4 — DISPLAY AI ANSWER
+                # -------------------------------------------------
 
                 st.markdown(answer)
 
-                # ---------------------------------------------
-                # Visualization
-                #
-                # Only generate graphs in Detailed mode.
-                # Concise mode stays clean.
-                # ---------------------------------------------
 
-                if (
-                    answer_mode
-                    == "📄 Detailed Intelligence Report"
+                # -------------------------------------------------
+                # STEP 5 — VISUALIZATIONS
+                # -------------------------------------------------
+
+                with st.spinner(
+                    "📊 Deciding which graphs are worth showing..."
                 ):
 
-                    with st.spinner(
-                        "📊 Checking whether "
-                        "visualizations are useful..."
-                    ):
-
-                        visualization_result = (
-                            generate_visualizations(
-                                relevant_articles,
-                                question,
-                                max_graphs=3,
-                            )
-                        )
-
-                    render_visualizations_in_streamlit(
-                        visualization_result
+                    viz_result = generate_visualizations(
+                        relevant_articles,
+                        question,
+                        max_graphs=3,
                     )
 
-                # ---------------------------------------------
-                # Sources
-                # ---------------------------------------------
 
-                render_sources(
-                    relevant_articles
+                render_visualizations_in_streamlit(
+                    viz_result
                 )
 
-        except Exception as error:
 
-            st.error(
-                "The request could not be completed."
-            )
+                # -------------------------------------------------
+                # STEP 6 — SOURCES
+                # -------------------------------------------------
 
-            st.exception(error)
+                st.divider()
+
+                st.subheader("🔗 Sources")
+
+
+                for article in relevant_articles:
+
+                    title = article.get(
+                        "title",
+                        "Untitled",
+                    )
+
+                    source = article.get(
+                        "source",
+                        "Unknown source",
+                    )
+
+                    url = article.get("url")
+
+                    published = article.get(
+                        "published",
+                        "Unknown date",
+                    )
+
+
+                    st.markdown(
+                        f"**{title}**"
+                    )
+
+                    st.caption(
+                        f"{source} • {published}"
+                    )
+
+
+                    if url:
+
+                        st.markdown(
+                            f"[Read original article]({url})"
+                        )
+
+
+                    st.divider()
+
+
+            except Exception as e:
+
+                st.error(
+                    "Something went wrong while "
+                    "processing your question."
+                )
+
+                st.exception(e)
+```
