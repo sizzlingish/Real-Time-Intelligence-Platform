@@ -133,95 +133,46 @@ def generate_intelligence(
     if concise:
 
         prompt = f"""
-You are the AI intelligence analyst for RTIP.
+You are the AI intelligence analyst for
+the Real-Time Intelligence Platform (RTIP).
 
-User question:
-"{question}"
-
-Use ONLY the supplied news articles.
+USER QUESTION:
+{question}
 
 NEWS DATA:
 {news_context}
 
-STRICT CONCISE MODE:
 
-Answer in EXACTLY 3 or 4 short lines.
+STRICT CONCISE MODE
 
-Rules:
+Your task is to answer the user's question
+using ONLY the supplied news articles.
+
+OUTPUT REQUIREMENTS:
+
+- Write EXACTLY 3 or 4 short lines.
+- Maximum 70 words total.
 - Directly answer the user's question.
 - Include only the most important information.
-- Mention the latest development if relevant.
-- Do not use headings.
-- Do not use bullet points.
-- Do not explain background.
-- Do not add "Why It Matters".
-- Do not add a source comparison section.
-- Do not repeat information.
-- Do not write more than 4 lines.
-- Do not exceed 70 words.
-- Do not invent facts.
+- Prioritize the newest relevant development.
+- Each line should contain useful information.
+- Do NOT use headings.
+- Do NOT use bullet points.
+- Do NOT use numbered lists.
+- Do NOT add a "Why It Matters" section.
+- Do NOT add a "Source Comparison" section.
+- Do NOT add a "Latest Information" section.
+- Do NOT repeat information.
+- Do NOT add an introduction or conclusion.
+- Do NOT mention these instructions.
+- Do NOT invent facts.
 
-Return ONLY the 3-4 line answer.
+If the sources disagree, mention the
+disagreement briefly within one of the lines.
+
+Return ONLY the 3-4 lines of the answer.
 """
 
-================ NEWS DATA ================
-
-{news_context}
-
-============== END NEWS DATA ==============
-
-
-IMPORTANT RULES:
-
-1. Answer the user's question directly.
-
-2. Use only information supported by the
-   supplied articles.
-
-3. Do not invent facts, names, dates,
-   statistics, quotes, or events.
-
-4. If sources disagree, briefly mention
-   the disagreement.
-
-5. Prefer the newest relevant information.
-
-6. Do not repeat information.
-
-7. Do not add unnecessary background.
-
-8. Keep the answer VERY SHORT.
-
-9. Do not write a long report.
-
-10. Do not include a separate "Why It Matters"
-    or "Latest Information" section.
-
-
-FORMAT:
-
-### 📰 Intelligence Summary
-
-Write 2-3 short sentences directly answering
-the user's question.
-
-
-### 🔎 Key Developments
-
-Give ONLY the 3 most important developments.
-
-Each bullet must be one short sentence.
-
-
-### ⚖️ Sources
-
-In 1 short sentence, state whether the sources
-generally agree or highlight an important
-difference.
-
-Keep the entire response concise.
-Aim for roughly 100-150 words maximum.
-"""
 
     # =====================================================
     # DETAILED MODE
@@ -362,5 +313,77 @@ Keep the response clear, factual, and useful.
         )
 
 
-    return answer.strip()
+    answer = answer.strip()
+
+
+    # =====================================================
+    # FINAL CONCISE CLEANUP
+    # =====================================================
+    #
+    # This provides an additional safeguard in case
+    # Gemini ignores the length instruction.
+    #
+
+    if concise:
+
+        # Remove markdown headings/bullets if Gemini
+        # accidentally adds them.
+
+        lines = []
+
+        for line in answer.splitlines():
+
+            line = line.strip()
+
+            if not line:
+                continue
+
+            if line.startswith("#"):
+                continue
+
+            if line.startswith("- "):
+                line = line[2:].strip()
+
+            if line.startswith("* "):
+                line = line[2:].strip()
+
+            if line:
+                lines.append(line)
+
+
+        # Keep only the first 4 useful lines.
+
+        lines = lines[:4]
+
+
+        # If Gemini returned more than 70 words,
+        # trim at a word boundary.
+
+        words = " ".join(lines).split()
+
+        if len(words) > 70:
+
+            words = words[:70]
+
+            shortened = " ".join(words)
+
+            # Avoid leaving an obviously unfinished
+            # sentence where possible.
+
+            last_period = shortened.rfind(".")
+
+            if last_period > 30:
+
+                shortened = shortened[
+                    :last_period + 1
+                ]
+
+            answer = shortened
+
+        else:
+
+            answer = "\n".join(lines)
+
+
+    return answer
 
