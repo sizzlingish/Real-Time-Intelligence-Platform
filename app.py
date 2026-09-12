@@ -6,6 +6,10 @@ from gnews_api import fetch_gnews
 from open_meteo_api import fetch_weather
 from retrieval import retrieve_articles
 from ai import generate_intelligence
+from visualization import (
+    generate_visualizations,
+    render_visualizations_in_streamlit
+)
 
 
 # --------------------------------------------------
@@ -65,6 +69,14 @@ with st.sidebar:
 
     st.checkbox(
         "Conflict detection",
+        value=True,
+        disabled=True
+    )
+
+    st.markdown("### Visualization")
+
+    st.checkbox(
+        "Auto-generated graphs",
         value=True,
         disabled=True
     )
@@ -400,14 +412,38 @@ The current conditions are relatively
 
 
                 # ----------------------------------
-                # STEP 4: Display AI answer
+                # STEP 4: Generate visual intelligence
+                # ----------------------------------
+
+                with st.spinner(
+                    "📊 Deciding which graphs are worth showing..."
+                ):
+
+                    viz_result = generate_visualizations(
+                        relevant_articles,
+                        question,
+                        max_graphs=3
+                    )
+
+
+                # ----------------------------------
+                # STEP 5: Display AI answer
                 # ----------------------------------
 
                 st.markdown(answer)
 
 
                 # ----------------------------------
-                # STEP 5: Display sources
+                # STEP 6: Display visualizations
+                # ----------------------------------
+
+                render_visualizations_in_streamlit(
+                    viz_result
+                )
+
+
+                # ----------------------------------
+                # STEP 7: Display sources
                 # ----------------------------------
 
                 st.divider()
@@ -426,7 +462,9 @@ The current conditions are relatively
                         "Unknown source"
                     )
 
-                    url = article.get("url")
+                    url = article.get(
+                        "url"
+                    )
 
                     published = article.get(
                         "published",
