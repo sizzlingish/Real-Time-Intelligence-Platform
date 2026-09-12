@@ -147,37 +147,37 @@ if question:
         st.write(question)
 
 
-    # ----------------------------------------------
+       # ----------------------------------------------
     # Detect question type
     # ----------------------------------------------
 
-  weather_keywords = [
-    "weather",
-    "temperature",
-    "forecast",
-    "rain",
-    "raining",
-    "wind",
-    "windy",
-    "humidity",
-    "hot",
-    "cold",
-    "heat",
-    "snow",
-    "snowing",
-    "sunny",
-    "cloudy",
-    "storm",
-    "stormy",
-    "degrees",
-    "how hot",
-    "how cold"
-]
+    weather_keywords = [
+        "weather",
+        "temperature",
+        "forecast",
+        "rain",
+        "raining",
+        "wind",
+        "windy",
+        "humidity",
+        "hot",
+        "cold",
+        "heat",
+        "snow",
+        "snowing",
+        "sunny",
+        "cloudy",
+        "storm",
+        "stormy",
+        "degrees",
+        "how hot",
+        "how cold"
+    ]
 
-is_weather_question = any(
-    keyword in question.lower()
-    for keyword in weather_keywords
-)
+    is_weather_question = any(
+        keyword in question.lower()
+        for keyword in weather_keywords
+    )
 
     # ==============================================
     # WEATHER QUESTION
