@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 
 from news_api import fetch_news
@@ -438,4 +437,4 @@ if question:
                 )
 
                 st.exception(e)
-```
+
