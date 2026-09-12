@@ -83,16 +83,172 @@ question = st.chat_input(
 # --------------------------------------------------
 
 if question:
-    weather = fetch_weather(
-        latitude=33.6844,
-        longitude=73.0479
-    )
-
-    st.write("🌦️ Current Weather")
-    st.write(weather["current"])
 
     with st.chat_message("user"):
         st.write(question)
+
+    # ----------------------------------------------
+    # Detect question type
+    # ----------------------------------------------
+
+    weather_keywords = [
+        "weather",
+        "temperature",
+        "forecast",
+        "rain",
+        "wind",
+        "humidity"
+    ]
+
+    is_weather_question = any(
+        keyword in question.lower()
+        for keyword in weather_keywords
+    )
+
+    # ----------------------------------------------
+    # Weather question
+    # ----------------------------------------------
+
+    if is_weather_question:
+
+        with st.chat_message("assistant"):
+
+            with st.spinner("🌦️ Getting current weather..."):
+
+                weather = fetch_weather(
+                    latitude=33.6844,
+                    longitude=73.0479
+                )
+
+            current = weather["current"]
+
+            st.subheader("🌦️ Current Weather")
+
+            st.write(
+                f"🌡️ Temperature: "
+                f"{current['temperature_2m']} °C"
+            )
+
+            st.write(
+                f"💧 Humidity: "
+                f"{current['relative_humidity_2m']}%"
+            )
+
+            st.write(
+                f"💨 Wind: "
+                f"{current['wind_speed_10m']} km/h"
+            )
+
+    # ----------------------------------------------
+    # News question
+    # ----------------------------------------------
+
+    else:
+
+        with st.chat_message("assistant"):
+
+            try:
+
+                with st.spinner(
+                    "🔎 Searching current news..."
+                ):
+
+                    newsdata_articles = fetch_news(
+                        query=question,
+                        language="en",
+                        limit=15
+                    )
+
+                    gnews_articles = fetch_gnews(
+                        query=question,
+                        language="en",
+                        max_results=10
+                    )
+
+                    articles = (
+                        newsdata_articles
+                        + gnews_articles
+                    )
+
+                if not articles:
+                    st.warning(
+                        "No relevant news articles were found."
+                    )
+                    st.stop()
+
+                with st.spinner(
+                    "🧠 Finding the most relevant information..."
+                ):
+
+                    relevant_articles = retrieve_articles(
+                        articles,
+                        question,
+                        max_articles=8
+                    )
+
+                if not relevant_articles:
+                    st.warning(
+                        "No relevant articles were found."
+                    )
+                    st.stop()
+
+                with st.spinner(
+                    "🤖 Analyzing the information..."
+                ):
+
+                    answer = generate_intelligence(
+                        question,
+                        relevant_articles
+                    )
+
+                st.markdown(answer)
+
+                st.divider()
+
+                st.subheader("🔗 Sources")
+
+                for article in relevant_articles:
+
+                    title = article.get(
+                        "title",
+                        "Untitled"
+                    )
+
+                    source = article.get(
+                        "source",
+                        "Unknown source"
+                    )
+
+                    url = article.get("url")
+
+                    published = article.get(
+                        "published",
+                        "Unknown date"
+                    )
+
+                    st.markdown(
+                        f"**{title}**"
+                    )
+
+                    st.caption(
+                        f"{source} • {published}"
+                    )
+
+                    if url:
+                        st.markdown(
+                            f"[Read original article]({url})"
+                        )
+
+                    st.divider()
+
+            except Exception as e:
+
+                st.error(
+                    "Something went wrong while processing "
+                    "your question."
+                )
+
+                st.exception(e)
 
 
             # ----------------------------------------------
