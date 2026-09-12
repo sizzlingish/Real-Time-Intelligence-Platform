@@ -8,9 +8,9 @@ from retrieval import retrieve_articles
 from ai import generate_intelligence
 
 
-# --------------------------------------------------
-# Page Configuration
-# --------------------------------------------------
+# ==================================================
+# PAGE CONFIGURATION
+# ==================================================
 
 st.set_page_config(
     page_title="RTIP | Real-Time Intelligence",
@@ -20,96 +20,120 @@ st.set_page_config(
 )
 
 
-# --------------------------------------------------
-# Custom Styling
-# --------------------------------------------------
+# ==================================================
+# CUSTOM CSS
+# ==================================================
 
 st.markdown(
     """
     <style>
 
-    /* ---------- Global ---------- */
+    /* ------------------------------
+       Main background
+    ------------------------------ */
 
     .stApp {
-        background: linear-gradient(
-            135deg,
-            #0b1020 0%,
-            #111827 50%,
-            #0b1220 100%
-        );
+        background:
+            radial-gradient(
+                circle at 50% 0%,
+                rgba(79, 70, 229, 0.10),
+                transparent 35%
+            ),
+            #0b1020;
     }
 
     .block-container {
-        max-width: 1200px;
-        padding-top: 2rem;
+        max-width: 1150px;
+        padding-top: 1.5rem;
         padding-bottom: 4rem;
     }
 
-    /* ---------- Header ---------- */
+
+    /* ------------------------------
+       Header
+    ------------------------------ */
 
     .rtip-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.2rem 1.5rem;
+
+        padding: 1rem 1.25rem;
         margin-bottom: 1.5rem;
+
         border: 1px solid rgba(255,255,255,0.08);
         border-radius: 18px;
+
         background: rgba(255,255,255,0.035);
-        backdrop-filter: blur(12px);
+        backdrop-filter: blur(10px);
     }
 
     .rtip-brand {
         display: flex;
         align-items: center;
-        gap: 14px;
+        gap: 13px;
     }
 
     .rtip-logo {
         width: 48px;
         height: 48px;
+
         display: flex;
         align-items: center;
         justify-content: center;
+
         border-radius: 14px;
-        font-size: 25px;
+
         background: rgba(99,102,241,0.15);
         border: 1px solid rgba(129,140,248,0.25);
+
+        font-size: 25px;
     }
 
     .rtip-title {
         font-size: 1.35rem;
-        font-weight: 700;
-        letter-spacing: 0.3px;
-        margin: 0;
+        font-weight: 750;
+        color: #f8fafc;
     }
 
     .rtip-subtitle {
-        color: #9ca3af;
-        font-size: 0.82rem;
-        margin-top: 3px;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 2px;
     }
+
+
+    /* ------------------------------
+       Live indicator
+    ------------------------------ */
 
     .live-status {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 0.8rem;
-        font-weight: 600;
+
         color: #d1d5db;
-        letter-spacing: 1px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 1.3px;
     }
 
     .live-dot {
         width: 9px;
         height: 9px;
+
         border-radius: 50%;
+
         background: #22c55e;
-        box-shadow: 0 0 12px #22c55e;
-        animation: pulse 1.8s infinite;
+
+        box-shadow:
+            0 0 8px rgba(34,197,94,0.8);
+
+        animation: livePulse 1.8s infinite;
     }
 
-    @keyframes pulse {
+    @keyframes livePulse {
+
         0% {
             opacity: 1;
             transform: scale(1);
@@ -124,151 +148,218 @@ st.markdown(
             opacity: 1;
             transform: scale(1);
         }
+
     }
 
-    /* ---------- Welcome ---------- */
+
+    /* ------------------------------
+       Welcome area
+    ------------------------------ */
 
     .welcome-box {
         text-align: center;
-        padding: 3rem 2rem 2rem;
-        margin: 1rem 0 1.5rem;
-        border-radius: 24px;
-        border: 1px solid rgba(255,255,255,0.08);
+
+        padding: 2.8rem 1.5rem 2.3rem;
+
+        margin-bottom: 1.4rem;
+
+        border-radius: 22px;
+
+        border: 1px solid rgba(255,255,255,0.07);
+
         background:
             radial-gradient(
-                circle at top,
-                rgba(99,102,241,0.13),
+                circle at 50% 0%,
+                rgba(99,102,241,0.14),
                 transparent 55%
             ),
             rgba(255,255,255,0.025);
     }
 
     .welcome-icon {
-        font-size: 3rem;
+        font-size: 2.8rem;
         margin-bottom: 0.7rem;
     }
 
     .welcome-title {
-        font-size: 2.1rem;
+        font-size: 2rem;
         font-weight: 750;
+        color: #f8fafc;
         margin-bottom: 0.5rem;
     }
 
     .welcome-text {
-        color: #9ca3af;
-        font-size: 1rem;
+        color: #94a3b8;
         max-width: 650px;
         margin: auto;
+        line-height: 1.6;
     }
 
-    /* ---------- Section Labels ---------- */
+
+    /* ------------------------------
+       Section labels
+    ------------------------------ */
 
     .section-label {
-        color: #9ca3af;
-        font-size: 0.75rem;
-        font-weight: 700;
+        font-size: 0.72rem;
+        font-weight: 750;
         letter-spacing: 1.5px;
-        margin: 1.2rem 0 0.7rem;
+        color: #94a3b8;
+
+        margin-top: 1.1rem;
+        margin-bottom: 0.7rem;
     }
 
-    /* ---------- Intelligence Card ---------- */
+
+    /* ------------------------------
+       Intelligence cards
+    ------------------------------ */
 
     .intel-card {
-        padding: 1.4rem;
-        margin: 1rem 0;
-        border-radius: 18px;
-        border: 1px solid rgba(255,255,255,0.08);
+        padding: 1.2rem;
+
+        border-radius: 17px;
+
+        border: 1px solid rgba(255,255,255,0.07);
+
         background: rgba(255,255,255,0.035);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+
+        margin-bottom: 0.8rem;
     }
 
-    .intel-card h3 {
-        margin-top: 0;
-        font-size: 1rem;
-    }
 
-    .intel-card p {
-        color: #cbd5e1;
-        line-height: 1.7;
-    }
-
-    /* ---------- Source Cards ---------- */
+    /* ------------------------------
+       Source cards
+    ------------------------------ */
 
     .source-card {
-        padding: 1.1rem 1.2rem;
-        margin: 0.8rem 0;
+        padding: 1rem 1.1rem;
+
+        margin-bottom: 0.8rem;
+
         border-radius: 16px;
+
         border: 1px solid rgba(255,255,255,0.07);
+
         background: rgba(255,255,255,0.025);
+
         transition: all 0.2s ease;
     }
 
     .source-card:hover {
         transform: translateY(-2px);
-        border-color: rgba(129,140,248,0.35);
-        background: rgba(255,255,255,0.045);
+
+        border-color:
+            rgba(129,140,248,0.4);
+
+        background:
+            rgba(255,255,255,0.045);
     }
 
     .source-name {
-        font-size: 0.75rem;
-        font-weight: 700;
+        font-size: 0.72rem;
+        font-weight: 750;
+
         color: #a5b4fc;
+
         text-transform: uppercase;
+
         letter-spacing: 0.8px;
     }
 
     .source-title {
-        font-size: 1rem;
+        color: #f1f5f9;
+
+        font-size: 0.98rem;
+
         font-weight: 650;
-        margin: 0.4rem 0;
+
         line-height: 1.45;
+
+        margin-top: 0.35rem;
+    }
+
+    .source-description {
+        color: #94a3b8;
+
+        font-size: 0.82rem;
+
+        line-height: 1.5;
+
+        margin-top: 0.5rem;
     }
 
     .source-date {
-        color: #6b7280;
-        font-size: 0.75rem;
+        color: #64748b;
+
+        font-size: 0.72rem;
+
+        margin-top: 0.45rem;
     }
 
-    /* ---------- Quick Question Buttons ---------- */
+
+    /* ------------------------------
+       Buttons
+    ------------------------------ */
 
     div.stButton > button {
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.09);
-        background: rgba(255,255,255,0.04);
-        color: #e5e7eb;
-        padding: 0.7rem 1rem;
+
+        border-radius: 13px;
+
+        border: 1px solid
+            rgba(255,255,255,0.08);
+
+        background:
+            rgba(255,255,255,0.035);
+
+        color: #e2e8f0;
+
+        min-height: 44px;
+
         transition: all 0.2s ease;
     }
 
     div.stButton > button:hover {
-        border-color: rgba(129,140,248,0.5);
-        background: rgba(99,102,241,0.12);
+
+        border-color:
+            rgba(129,140,248,0.45);
+
+        background:
+            rgba(99,102,241,0.10);
+
         transform: translateY(-2px);
     }
 
-    /* ---------- Chat ---------- */
+
+    /* ------------------------------
+       Chat messages
+    ------------------------------ */
 
     [data-testid="stChatMessage"] {
+
         border-radius: 18px;
-        margin-bottom: 0.8rem;
+
+        margin-bottom: 0.7rem;
     }
 
-    /* ---------- Sidebar ---------- */
+
+    /* ------------------------------
+       Sidebar
+    ------------------------------ */
 
     [data-testid="stSidebar"] {
-        background: #090e1a;
-        border-right: 1px solid rgba(255,255,255,0.06);
+
+        background: #080d19;
+
+        border-right:
+            1px solid
+            rgba(255,255,255,0.06);
     }
 
-    .sidebar-status {
-        padding: 1rem;
-        border-radius: 14px;
-        background: rgba(34,197,94,0.06);
-        border: 1px solid rgba(34,197,94,0.12);
-        margin-bottom: 1rem;
-    }
 
-    /* ---------- Hide Streamlit Branding ---------- */
+    /* ------------------------------
+       Hide Streamlit menu/footer
+    ------------------------------ */
 
     #MainMenu {
         visibility: hidden;
@@ -284,9 +375,9 @@ st.markdown(
 )
 
 
-# --------------------------------------------------
-# Header
-# --------------------------------------------------
+# ==================================================
+# HEADER
+# ==================================================
 
 st.markdown(
     """
@@ -299,6 +390,7 @@ st.markdown(
             </div>
 
             <div>
+
                 <div class="rtip-title">
                     RTIP
                 </div>
@@ -306,13 +398,17 @@ st.markdown(
                 <div class="rtip-subtitle">
                     Real-Time Intelligence Platform
                 </div>
+
             </div>
 
         </div>
 
         <div class="live-status">
+
             <span class="live-dot"></span>
+
             LIVE
+
         </div>
 
     </div>
@@ -321,25 +417,21 @@ st.markdown(
 )
 
 
-# --------------------------------------------------
-# Sidebar
-# --------------------------------------------------
+# ==================================================
+# SIDEBAR
+# ==================================================
 
 with st.sidebar:
 
     st.markdown("## 🛰️ RTIP")
 
-    st.markdown(
-        """
-        <div class="sidebar-status">
-            <b>● System Online</b><br>
-            <span style="color:#9ca3af;">
-            Monitoring connected intelligence sources
-            </span>
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.success("● System Online")
+
+    st.caption(
+        "Monitoring connected intelligence sources"
     )
+
+    st.divider()
 
     st.markdown("### 📡 Data Sources")
 
@@ -390,28 +482,42 @@ with st.sidebar:
     )
 
 
-# --------------------------------------------------
-# Weather Location Extraction
-# --------------------------------------------------
+# ==================================================
+# WEATHER LOCATION EXTRACTION
+# ==================================================
 
 def extract_weather_location(question):
 
     question = question.strip()
 
     patterns = [
+
         r"weather\s+(?:in|at|for|of)\s+(.+)",
+
         r"temperature\s+(?:in|at|for|of)\s+(.+)",
+
         r"forecast\s+(?:in|at|for|of)\s+(.+)",
+
         r"rain\s+(?:in|at|for|of)\s+(.+)",
+
         r"humidity\s+(?:in|at|for|of)\s+(.+)",
+
         r"wind\s+(?:in|at|for|of)\s+(.+)",
+
         r"hot\s+(?:in|at|for|of)\s+(.+)",
+
         r"cold\s+(?:in|at|for|of)\s+(.+)",
+
         r"sunny\s+(?:in|at|for|of)\s+(.+)",
+
         r"cloudy\s+(?:in|at|for|of)\s+(.+)",
+
         r"raining\s+(?:in|at|for|of)\s+(.+)",
+
         r"snow\s+(?:in|at|for|of)\s+(.+)",
+
         r"how hot\s+(?:is|in|at)\s+(.+)",
+
         r"how cold\s+(?:is|in|at)\s+(.+)",
     ]
 
@@ -436,9 +542,9 @@ def extract_weather_location(question):
     return None
 
 
-# --------------------------------------------------
-# Welcome Screen
-# --------------------------------------------------
+# ==================================================
+# WELCOME SCREEN
+# ==================================================
 
 st.markdown(
     """
@@ -453,9 +559,9 @@ st.markdown(
         </div>
 
         <div class="welcome-text">
-            Search current events across multiple news
-            sources and turn scattered headlines into
-            clear intelligence.
+            Search current events across multiple
+            news sources and turn scattered headlines
+            into clear intelligence.
         </div>
 
     </div>
@@ -464,68 +570,77 @@ st.markdown(
 )
 
 
-# --------------------------------------------------
-# Quick Questions
-# --------------------------------------------------
+# ==================================================
+# QUICK QUESTIONS
+# ==================================================
 
 st.markdown(
     '<div class="section-label">⚡ EXPLORE LIVE INTELLIGENCE</div>',
     unsafe_allow_html=True
 )
 
+
 quick_questions = [
-    "🌍 Latest global news",
-    "🇵🇰 What's happening in Pakistan?",
+    "🌍 Global headlines",
+    "🇵🇰 Pakistan news",
     "🤖 Latest AI news",
-    "⚔️ Major world conflicts",
-    "📈 Biggest stories today",
+    "⚔️ World conflicts",
+    "📈 Biggest stories",
 ]
 
-cols = st.columns(len(quick_questions))
 
-for index, question_text in enumerate(quick_questions):
+quick_cols = st.columns(5)
 
-    with cols[index]:
+
+for index, quick_question in enumerate(
+    quick_questions
+):
+
+    with quick_cols[index]:
 
         if st.button(
-            question_text,
+            quick_question,
             use_container_width=True
         ):
-            st.session_state["quick_question"] = (
-                question_text
-                .split(" ", 1)[1]
-            )
+
+            st.session_state[
+                "selected_question"
+            ] = quick_question
 
 
-# --------------------------------------------------
-# Get Question
-# --------------------------------------------------
+# ==================================================
+# CHAT INPUT
+# ==================================================
 
 question = st.chat_input(
     "Ask RTIP what's happening..."
 )
 
 
-# --------------------------------------------------
-# Handle Quick Question
-# --------------------------------------------------
+# ==================================================
+# QUICK QUESTION HANDLER
+# ==================================================
 
-if "quick_question" in st.session_state:
+if (
+    not question
+    and "selected_question"
+    in st.session_state
+):
 
     question = st.session_state.pop(
-        "quick_question"
+        "selected_question"
     )
 
 
-# --------------------------------------------------
-# Process Question
-# --------------------------------------------------
+# ==================================================
+# PROCESS QUESTION
+# ==================================================
 
 if question:
 
-    # ----------------------------------------------
-    # User Message
-    # ----------------------------------------------
+    # ------------------------------------------------
+    # USER MESSAGE
+    # ------------------------------------------------
 
     with st.chat_message(
         "user",
@@ -535,11 +650,12 @@ if question:
         st.write(question)
 
 
-    # ----------------------------------------------
-    # Question Detection
-    # ----------------------------------------------
+    # ------------------------------------------------
+    # WEATHER DETECTION
+    # ------------------------------------------------
 
     weather_keywords = [
+
         "weather",
         "temperature",
         "forecast",
@@ -562,14 +678,19 @@ if question:
         "how cold"
     ]
 
+
     is_weather_question = any(
+
         keyword in question.lower()
-        for keyword in weather_keywords
+
+        for keyword
+        in weather_keywords
+
     )
 
 
     # ==================================================
-    # WEATHER
+    # WEATHER QUESTION
     # ==================================================
 
     if is_weather_question:
@@ -581,9 +702,12 @@ if question:
 
             try:
 
-                location = extract_weather_location(
-                    question
+                location = (
+                    extract_weather_location(
+                        question
+                    )
                 )
+
 
                 if not location:
 
@@ -598,6 +722,10 @@ if question:
                     st.stop()
 
 
+                # ------------------------------------
+                # Fetch weather
+                # ------------------------------------
+
                 with st.spinner(
                     f"🌦️ Checking live weather for {location}..."
                 ):
@@ -607,7 +735,10 @@ if question:
                     )
 
 
-                current = weather["current"]
+                current = weather[
+                    "current"
+                ]
+
 
                 temperature = current[
                     "temperature_2m"
@@ -622,7 +753,9 @@ if question:
                 ]
 
 
+                # ------------------------------------
                 # Temperature description
+                # ------------------------------------
 
                 if temperature >= 35:
 
@@ -661,7 +794,9 @@ if question:
                     )
 
 
+                # ------------------------------------
                 # Wind description
+                # ------------------------------------
 
                 if wind >= 30:
 
@@ -682,35 +817,52 @@ if question:
                     )
 
 
-                # Weather card
+                # ------------------------------------
+                # Weather UI
+                # ------------------------------------
 
                 st.markdown(
-                    f"""
-                    <div class="intel-card">
+                    '<div class="intel-card">',
+                    unsafe_allow_html=True
+                )
 
-                        <h3>
-                            🌦️ LIVE WEATHER
-                        </h3>
+                st.markdown(
+                    "### 🌦️ LIVE WEATHER"
+                )
 
-                        <h2>
-                            {location.title()}
-                        </h2>
+                st.markdown(
+                    f"## {location.title()}"
+                )
 
-                        <p>
-                            <b style="font-size:1.5rem;">
-                            {temperature}°C
-                            </b>
-                        </p>
+                st.metric(
+                    "Temperature",
+                    f"{temperature}°C"
+                )
 
-                        <p>
-                            Current conditions are
-                            <b>{temperature_description}</b>,
-                            with {humidity}% humidity
-                            and {wind_description}.
-                        </p>
+                col1, col2 = st.columns(2)
 
-                    </div>
-                    """,
+                with col1:
+
+                    st.metric(
+                        "Humidity",
+                        f"{humidity}%"
+                    )
+
+                with col2:
+
+                    st.metric(
+                        "Wind",
+                        f"{wind} km/h"
+                    )
+
+                st.info(
+                    f"Current conditions are "
+                    f"**{temperature_description}** "
+                    f"with **{wind_description}**."
+                )
+
+                st.markdown(
+                    "</div>",
                     unsafe_allow_html=True
                 )
 
@@ -726,7 +878,7 @@ if question:
 
 
     # ==================================================
-    # NEWS
+    # NEWS QUESTION
     # ==================================================
 
     else:
@@ -739,7 +891,7 @@ if question:
             try:
 
                 # --------------------------------------
-                # STEP 1: Retrieve News
+                # STEP 1 — NEWS APIs
                 # --------------------------------------
 
                 with st.spinner(
@@ -752,11 +904,13 @@ if question:
                         limit=15
                     )
 
+
                     gnews_articles = fetch_gnews(
                         query=question,
                         language="en",
                         max_results=10
                     )
+
 
                     articles = (
                         newsdata_articles
@@ -765,7 +919,7 @@ if question:
 
 
                 # --------------------------------------
-                # Check Results
+                # Check articles
                 # --------------------------------------
 
                 if not articles:
@@ -778,17 +932,19 @@ if question:
 
 
                 # --------------------------------------
-                # STEP 2: Retrieval
+                # STEP 2 — RETRIEVAL
                 # --------------------------------------
 
                 with st.spinner(
                     "🔎 Cross-checking and ranking information..."
                 ):
 
-                    relevant_articles = retrieve_articles(
-                        articles,
-                        question,
-                        max_articles=8
+                    relevant_articles = (
+                        retrieve_articles(
+                            articles,
+                            question,
+                            max_articles=8
+                        )
                     )
 
 
@@ -802,58 +958,67 @@ if question:
 
 
                 # --------------------------------------
-                # STEP 3: AI Analysis
+                # STEP 3 — GEMINI
                 # --------------------------------------
 
                 with st.spinner(
                     "🧠 Building intelligence brief..."
                 ):
 
-                    answer = generate_intelligence(
-                        question,
-                        relevant_articles
+                    answer = (
+                        generate_intelligence(
+                            question,
+                            relevant_articles
+                        )
                     )
 
 
                 # --------------------------------------
-                # STEP 4: Intelligence Header
+                # INTELLIGENCE HEADER
                 # --------------------------------------
 
                 st.markdown(
-                    """
-                    <div class="intel-card">
+                    '<div class="intel-card">',
+                    unsafe_allow_html=True
+                )
 
-                        <h3>
-                            🧠 INTELLIGENCE BRIEF
-                        </h3>
+                st.markdown(
+                    "### 🧠 INTELLIGENCE BRIEF"
+                )
 
-                        <p>
-                            Analysis generated from
-                            multiple current news sources.
-                        </p>
+                st.caption(
+                    "Analysis generated from multiple "
+                    "current news sources."
+                )
 
-                    </div>
-                    """,
+                st.markdown(
+                    "</div>",
                     unsafe_allow_html=True
                 )
 
 
                 # --------------------------------------
-                # STEP 5: AI Answer
+                # AI RESPONSE
                 # --------------------------------------
 
                 st.markdown(answer)
 
 
                 # --------------------------------------
-                # STEP 6: Sources
+                # SOURCE SECTION
                 # --------------------------------------
 
                 st.markdown(
-                    '<div class="section-label">📰 SOURCES</div>',
+                    '<div class="section-label">'
+                    '📰 SOURCES'
+                    '</div>',
                     unsafe_allow_html=True
                 )
 
+
+                # --------------------------------------
+                # SOURCE CARDS
+                # --------------------------------------
 
                 for article in relevant_articles:
 
@@ -881,19 +1046,29 @@ if question:
                         ""
                     )
 
+
                     if description:
 
-                        description = (
-                            description[:180]
-                            + "..."
-                            if len(description) > 180
-                            else description
-                        )
+                        if len(description) > 180:
+
+                            description = (
+                                description[:180]
+                                + "..."
+                            )
 
 
-                    source_card = f"""
-                    <div class="source-card">
+                    # ----------------------------------
+                    # Card
+                    # ----------------------------------
 
+                    st.markdown(
+                        '<div class="source-card">',
+                        unsafe_allow_html=True
+                    )
+
+
+                    st.markdown(
+                        f"""
                         <div class="source-name">
                             📰 {source}
                         </div>
@@ -901,54 +1076,44 @@ if question:
                         <div class="source-title">
                             {title}
                         </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
-                        <div class="source-date">
-                            🕐 {published}
-                        </div>
-
-                    """
 
                     if description:
 
-                        source_card += f"""
-                        <div style="
-                            color:#9ca3af;
-                            font-size:0.85rem;
-                            margin-top:0.5rem;
-                            line-height:1.5;
-                        ">
-                            {description}
+                        st.markdown(
+                            f"""
+                            <div class="source-description">
+                                {description}
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+
+
+                    st.markdown(
+                        f"""
+                        <div class="source-date">
+                            🕐 {published}
                         </div>
-                        """
+                        """,
+                        unsafe_allow_html=True
+                    )
 
 
                     if url:
 
-                        source_card += f"""
-                        <div style="
-                            margin-top:0.8rem;
-                        ">
-                            <a
-                                href="{url}"
-                                target="_blank"
-                                style="
-                                    color:#a5b4fc;
-                                    text-decoration:none;
-                                    font-weight:600;
-                                    font-size:0.85rem;
-                                "
-                            >
-                                Read original article →
-                            </a>
-                        </div>
-                        """
-
-
-                    source_card += "</div>"
+                        st.link_button(
+                            "Read original article →",
+                            url,
+                            use_container_width=False
+                        )
 
 
                     st.markdown(
-                        source_card,
+                        "</div>",
                         unsafe_allow_html=True
                     )
 
