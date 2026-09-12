@@ -3,18 +3,18 @@ import os
 from google import genai
 
 
-# ---------------------------------------------------------
+# =========================================================
 # GEMINI CONFIGURATION
-# ---------------------------------------------------------
+# =========================================================
 
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-3.6-flash"
 
+
+# =========================================================
+# API KEY
+# =========================================================
 
 def get_gemini_api_key():
-    """
-    Get the Gemini API key from environment variables.
-    """
-
     api_key = os.getenv("GEMINI_API_KEY")
 
     if not api_key:
@@ -25,11 +25,11 @@ def get_gemini_api_key():
     return api_key
 
 
-def get_client():
-    """
-    Create and return the Gemini client.
-    """
+# =========================================================
+# GEMINI CLIENT
+# =========================================================
 
+def get_client():
     api_key = get_gemini_api_key()
 
     return genai.Client(
@@ -37,22 +37,18 @@ def get_client():
     )
 
 
-# ---------------------------------------------------------
+# =========================================================
 # BUILD NEWS CONTEXT
-# ---------------------------------------------------------
+# =========================================================
 
 def build_news_context(articles):
-    """
-    Convert retrieved news articles into a clean
-    text context for Gemini.
-    """
 
     if not articles:
         return "No news articles were found."
 
     context = []
 
-    for i, article in enumerate(
+    for index, article in enumerate(
         articles,
         start=1
     ):
@@ -82,9 +78,8 @@ def build_news_context(articles):
             "No URL available"
         )
 
-
         article_text = f"""
-ARTICLE {i}
+ARTICLE {index}
 
 Title: {title}
 
@@ -97,34 +92,21 @@ Description: {description}
 URL: {url}
 """
 
-
         context.append(
             article_text.strip()
         )
 
-
     return "\n\n".join(context)
 
 
-# ---------------------------------------------------------
+# =========================================================
 # GENERATE INTELLIGENCE
-# ---------------------------------------------------------
+# =========================================================
 
 def generate_intelligence(
     question,
     articles
 ):
-    """
-    Generate an intelligence answer using
-    the retrieved news articles.
-
-    Expected usage:
-
-        generate_intelligence(
-            question,
-            relevant_articles
-        )
-    """
 
     if not question:
         raise ValueError(
@@ -136,13 +118,11 @@ def generate_intelligence(
             "No articles were provided."
         )
 
-
     client = get_client()
 
     news_context = build_news_context(
         articles
     )
-
 
     prompt = f"""
 You are the AI intelligence analyst for
@@ -152,9 +132,12 @@ The user asked:
 
 "{question}"
 
+You have been given a collection of recent
+news articles retrieved from multiple news
+sources.
 
-Your task is to answer the user's question
-using ONLY the news information provided below.
+Your job is to analyze these articles and
+answer the user's question.
 
 ================ NEWS DATA ================
 
@@ -165,80 +148,70 @@ using ONLY the news information provided below.
 
 IMPORTANT RULES:
 
-1. Do not invent facts.
+1. Use the supplied news articles as your
+   primary evidence.
 
-2. Do not use information that is not present
-   in the supplied news articles.
+2. Do not invent facts.
 
-3. If the articles do not contain enough
-   information to answer the question,
-   clearly say that the available information
-   is insufficient.
+3. Do not invent names, dates, statistics,
+   quotes, locations, or events.
 
-4. If different sources report different
-   information, identify the disagreement.
+4. If the sources disagree, clearly identify
+   the disagreement.
 
-5. Distinguish confirmed information from
-   uncertainty.
+5. If the available articles are insufficient
+   to answer something confidently, say so.
 
-6. Prefer the newest information when discussing
-   current developments.
+6. Prefer the newest relevant information.
 
-7. Do not repeat the same information unnecessarily.
+7. Distinguish reported facts from uncertainty.
 
 8. Keep the answer concise and useful.
 
-9. Do not mention that you are an AI unless
-   necessary.
+9. Do not repeat the same information.
 
-10. Do not fabricate statistics, dates, names,
-    locations, quotes, or events.
+10. Do not claim that you personally verified
+    information outside the supplied articles.
 
 
-FORMAT YOUR RESPONSE:
+FORMAT:
+
 
 ### 📰 Intelligence Summary
 
-Give a concise answer to the user's question
-based on the retrieved news.
+Give a concise answer to the user's question.
 
 
 ### 🔎 Key Developments
 
-List the most important developments.
-
-Use short bullet points.
+Give the most important developments as
+short bullet points.
 
 
 ### ⚖️ Source Comparison
 
-Explain what the available sources agree on.
+Explain what the sources agree on.
 
-If sources disagree, clearly explain the
-difference.
+If they disagree, explain how.
 
 
 ### 📌 Why It Matters
 
-Explain why the developments are important,
-but only when the significance can reasonably
-be supported by the supplied information.
+Explain the significance of the developments
+when supported by the available information.
 
 
 ### 🕐 Latest Information
 
-Identify the newest relevant information
-available in the retrieved articles.
+Mention the newest relevant information
+available in the supplied articles.
 
-Mention the source and date when available.
+Include the source and publication date
+when available.
 
 
-Keep the overall response concise.
-
-Do not add information that is not supported
-by the supplied news.
+Keep the response clear, factual, and concise.
 """
-
 
     try:
 
@@ -247,16 +220,17 @@ by the supplied news.
             contents=prompt,
         )
 
-    except Exception as e:
+    except Exception as error:
 
         raise RuntimeError(
-            f"Gemini API request failed: {e}"
-        ) from e
+            f"Gemini API request failed: {error}"
+        ) from error
 
 
-    if not response:
+    if response is None:
+
         raise RuntimeError(
-            "Gemini returned an empty response."
+            "Gemini returned no response."
         )
 
 
@@ -268,8 +242,9 @@ by the supplied news.
 
 
     if not answer:
+
         raise RuntimeError(
-            "Gemini returned an empty text response."
+            "Gemini returned an empty response."
         )
 
 
