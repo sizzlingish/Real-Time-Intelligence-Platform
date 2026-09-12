@@ -23,11 +23,11 @@ def fetch_gnews(
     api_key = get_gnews_api_key()
 
     params = {
-    "apikey": api_key,
-    "lang": language,
-    "max": max_results,
-    "sortby": "publishedAt",
-}
+        "apikey": api_key,
+        "lang": language,
+        "max": max_results,
+        "sortby": "publishedAt",
+    }
 
     if query:
         params["q"] = query
@@ -42,7 +42,13 @@ def fetch_gnews(
             timeout=15
         )
 
-        response.raise_for_status()
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"GNews API error: "
+                f"{response.status_code} - "
+                f"{response.text}"
+            )
+
         data = response.json()
 
     except requests.exceptions.RequestException as e:
