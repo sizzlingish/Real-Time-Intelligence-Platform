@@ -4,10 +4,7 @@ from news_api import fetch_news
 from gnews_api import fetch_gnews
 from open_meteo_api import fetch_weather
 from retrieval import retrieve_articles
-from ai import (
-    generate_intelligence,
-    generate_advanced_research,
-)
+from ai import generate_intelligence, generate_advanced_research
 
 from visualization import (
     generate_visualizations,
@@ -16,7 +13,7 @@ from visualization import (
 
 
 # ============================================================
-# PAGE CONFIG
+# PAGE CONFIGURATION
 # ============================================================
 
 st.set_page_config(
@@ -27,17 +24,12 @@ st.set_page_config(
 
 
 # ============================================================
-# PROFESSIONAL RTIP STYLING
+# CUSTOM STYLING
 # ============================================================
 
 st.markdown(
     """
     <style>
-
-    /* ========================================================
-       GLOBAL PAGE
-       ======================================================== */
-
     .stApp {
         background:
             radial-gradient(
@@ -54,11 +46,6 @@ st.markdown(
         padding-top: 2.2rem;
         padding-bottom: 5rem;
     }
-
-
-    /* ========================================================
-       MAIN TITLE
-       ======================================================== */
 
     h1 {
         color: #f8fafc !important;
@@ -82,11 +69,6 @@ st.markdown(
         color: #94a3b8 !important;
     }
 
-
-    /* ========================================================
-       SIDEBAR
-       ======================================================== */
-
     section[data-testid="stSidebar"] {
         background:
             linear-gradient(
@@ -107,11 +89,6 @@ st.markdown(
         color: #94a3b8;
     }
 
-
-    /* ========================================================
-       SELECTBOXES / RADIO / SLIDER
-       ======================================================== */
-
     div[data-baseweb="select"] > div {
         background-color: #0f172a;
         border-color: #334155;
@@ -125,11 +102,6 @@ st.markdown(
     div[role="radiogroup"] label {
         color: #cbd5e1;
     }
-
-
-    /* ========================================================
-       CHAT MESSAGES
-       ======================================================== */
 
     div[data-testid="stChatMessage"] {
         border-radius: 14px;
@@ -154,11 +126,6 @@ st.markdown(
             0 4px 18px rgba(0, 0, 0, 0.14);
     }
 
-
-    /* ========================================================
-       CHAT INPUT
-       ======================================================== */
-
     div[data-testid="stChatInput"] {
         background-color: #0d1728;
         border: 1px solid #334155;
@@ -173,11 +140,6 @@ st.markdown(
             0 0 0 1px #3b82f6,
             0 8px 30px rgba(0, 0, 0, 0.25);
     }
-
-
-    /* ========================================================
-       METRICS
-       ======================================================== */
 
     div[data-testid="stMetric"] {
         background-color: #0f172a;
@@ -194,11 +156,6 @@ st.markdown(
         color: #f8fafc !important;
     }
 
-
-    /* ========================================================
-       BUTTONS
-       ======================================================== */
-
     .stButton > button {
         background-color: #111827;
         color: #cbd5e1;
@@ -213,19 +170,9 @@ st.markdown(
         color: #ffffff;
     }
 
-
-    /* ========================================================
-       DIVIDERS
-       ======================================================== */
-
     hr {
         border-color: #1e293b;
     }
-
-
-    /* ========================================================
-       LINKS
-       ======================================================== */
 
     a {
         color: #60a5fa !important;
@@ -235,19 +182,9 @@ st.markdown(
         color: #93c5fd !important;
     }
 
-
-    /* ========================================================
-       ALERTS
-       ======================================================== */
-
     div[data-testid="stAlert"] {
         border-radius: 10px;
     }
-
-
-    /* ========================================================
-       SCROLLBAR
-       ======================================================== */
 
     ::-webkit-scrollbar {
         width: 8px;
@@ -265,7 +202,6 @@ st.markdown(
     ::-webkit-scrollbar-thumb:hover {
         background: #334d73;
     }
-
     </style>
     """,
     unsafe_allow_html=True,
@@ -280,21 +216,26 @@ st.title("Real-Time Intelligence Platform")
 
 st.caption(
     "Ask about the latest news, compare sources, explore developments, "
-    "and get AI-powered intelligence."
+    "check weather, and get AI-powered intelligence."
 )
 
 
 # ============================================================
-# SIDEBAR
+# SIDEBAR SETTINGS
 # ============================================================
 
 with st.sidebar:
 
     st.header("⚙️ Intelligence Settings")
 
-    location = st.selectbox(
-        "🌍 Location",
+    # --------------------------------------------------------
+    # NEWS LOCATION
+    # --------------------------------------------------------
+
+    news_location = st.selectbox(
+        "🌍 News Search Location",
         [
+            "No specific location",
             "Worldwide",
             "Pakistan",
             "India",
@@ -308,9 +249,14 @@ with st.sidebar:
         index=0,
     )
 
+    # --------------------------------------------------------
+    # TOPIC
+    # --------------------------------------------------------
+
     topic = st.selectbox(
         "📰 Topic",
         [
+            "All Topics",
             "AI",
             "Technology",
             "Politics",
@@ -325,6 +271,10 @@ with st.sidebar:
         index=0,
     )
 
+    # --------------------------------------------------------
+    # ANSWER MODE
+    # --------------------------------------------------------
+
     answer_mode = st.radio(
         "🧠 Answer Mode",
         [
@@ -335,34 +285,36 @@ with st.sidebar:
         index=0,
     )
 
-
-    # ========================================================
-    # ARTICLE LIMIT BASED ON ANSWER MODE
-    # ========================================================
+    # --------------------------------------------------------
+    # ARTICLE LIMIT
+    # --------------------------------------------------------
 
     if answer_mode == "⚡ Smart Concise Intelligence":
 
-        default_article_limit = 8
-        max_article_limit = 15
+        article_limit = st.slider(
+            "📚 Number of Articles to Analyze",
+            min_value=5,
+            max_value=15,
+            value=8,
+        )
 
     elif answer_mode == "📄 Detailed Intelligence Report":
 
-        default_article_limit = 12
-        max_article_limit = 20
+        article_limit = st.slider(
+            "📚 Number of Articles to Analyze",
+            min_value=5,
+            max_value=20,
+            value=12,
+        )
 
     else:
 
-        default_article_limit = 18
-        max_article_limit = 25
-
-
-    article_limit = st.slider(
-        "📚 Number of Articles to Analyze",
-        min_value=5,
-        max_value=max_article_limit,
-        value=default_article_limit,
-        step=1,
-    )
+        article_limit = st.slider(
+            "📚 Number of Articles to Analyze",
+            min_value=8,
+            max_value=25,
+            value=18,
+        )
 
 
 # ============================================================
@@ -392,7 +344,7 @@ def is_weather_question(text):
 
 
 # ============================================================
-# WEATHER RESPONSE
+# WEATHER DISPLAY
 # ============================================================
 
 def show_weather(question_text):
@@ -401,15 +353,22 @@ def show_weather(question_text):
 
     text = question_text.strip()
 
-    # Try to extract the location from common weather questions.
     patterns = [
+
         r"weather\s+(?:in|at|for)\s+(.+)",
+
         r"temperature\s+(?:in|at|for)\s+(.+)",
+
         r"forecast\s+(?:in|at|for)\s+(.+)",
+
         r"weather\s+(.+)",
+
         r"temperature\s+(.+)",
+
         r"forecast\s+(.+)",
+
         r"how(?:'s| is)\s+the\s+weather(?:\s+like)?\s+(?:in|at|for)\s+(.+)",
+
         r"what(?:'s| is)\s+the\s+weather(?:\s+like)?\s+(?:in|at|for)\s+(.+)",
     ]
 
@@ -420,7 +379,7 @@ def show_weather(question_text):
         match = re.search(
             pattern,
             text,
-            re.IGNORECASE
+            re.IGNORECASE,
         )
 
         if match:
@@ -431,18 +390,19 @@ def show_weather(question_text):
 
             break
 
-    # Remove common punctuation.
     if extracted_location:
 
-        extracted_location = extracted_location.rstrip(
-            "?.!,"
-        ).strip()
+        extracted_location = (
+            extracted_location
+            .rstrip("?.!,")
+            .strip()
+        )
 
     if not extracted_location:
 
         st.warning(
             "Please include a location, for example: "
-            "`What is the weather in Islamabad?`"
+            "`What is the weather in London?`"
         )
 
         return
@@ -543,7 +503,7 @@ def render_sources(articles):
 
     for index, article in enumerate(
         articles,
-        start=1
+        start=1,
     ):
 
         title = article.get(
@@ -561,9 +521,7 @@ def render_sources(articles):
             "Unknown date"
         )
 
-        url = article.get(
-            "url"
-        )
+        url = article.get("url")
 
         source_text = (
             f"**{index}. {title}**  \n"
@@ -585,13 +543,17 @@ def render_sources(articles):
 
 
 # ============================================================
-# MAIN APPLICATION
+# CHAT INPUT
 # ============================================================
 
 question = st.chat_input(
-    "Ask about the latest news..."
+    "Ask about the latest news or weather..."
 )
 
+
+# ============================================================
+# MAIN QUESTION PROCESSING
+# ============================================================
 
 if question:
 
@@ -607,30 +569,55 @@ if question:
 
 
     # ========================================================
-    # BUILD NEWS QUERY
+    # BUILD NEWS SEARCH QUERY
     # ========================================================
 
-    if location == "Worldwide":
+    search_parts = []
 
-        search_query = (
-            f"{topic} {question}"
+
+    # Add location only if the user selected one
+    if news_location not in [
+        "No specific location",
+        "Worldwide",
+    ]:
+
+        search_parts.append(
+            news_location
         )
 
-    else:
 
-        search_query = (
-            f"{location} {topic} {question}"
+    # Add topic only if the user selected one
+    if topic != "All Topics":
+
+        search_parts.append(
+            topic
         )
+
+
+    # Always include the actual user question
+    search_parts.append(
+        question
+    )
+
+
+    search_query = " ".join(
+        search_parts
+    )
 
 
     # ========================================================
-    # FETCH NEWSDATA
+    # FETCH NEWS
     # ========================================================
 
     all_articles = []
 
     newsdata_error = None
     gnews_error = None
+
+
+    # --------------------------------------------------------
+    # NEWSDATA
+    # --------------------------------------------------------
 
     with st.spinner(
         "📰 Searching NewsData..."
@@ -655,9 +642,9 @@ if question:
             newsdata_error = str(error)
 
 
-    # ========================================================
-    # FETCH GNEWS
-    # ========================================================
+    # --------------------------------------------------------
+    # GNEWS
+    # --------------------------------------------------------
 
     with st.spinner(
         "🌐 Searching GNews..."
@@ -683,7 +670,7 @@ if question:
 
 
     # ========================================================
-    # CHECK NEWS RESULTS
+    # NO ARTICLES
     # ========================================================
 
     if not all_articles:
@@ -708,18 +695,8 @@ if question:
 
 
     # ========================================================
-    # RETRIEVE RELEVANT ARTICLES
+    # RETRIEVE MOST RELEVANT ARTICLES
     # ========================================================
-
-    # Important:
-    #
-    # The old code always used max_articles=8.
-    #
-    # That would prevent Advanced Research mode
-    # from actually using the additional articles.
-    #
-    # We now retrieve according to the selected
-    # article limit.
 
     relevant_articles = retrieve_articles(
         all_articles,
@@ -741,7 +718,10 @@ if question:
     # AI INTELLIGENCE
     # ========================================================
 
-    st.subheader("🧠 Intelligence")
+    st.subheader(
+        "🧠 Intelligence"
+    )
+
 
     try:
 
@@ -749,11 +729,13 @@ if question:
             "🤖 Generating intelligence..."
         ):
 
-            # ==================================================
+            # ------------------------------------------------
             # CONCISE MODE
-            # ==================================================
+            # ------------------------------------------------
 
-            if answer_mode == "⚡ Smart Concise Intelligence":
+            if answer_mode == (
+                "⚡ Smart Concise Intelligence"
+            ):
 
                 answer = generate_intelligence(
                     question,
@@ -762,11 +744,13 @@ if question:
                 )
 
 
-            # ==================================================
+            # ------------------------------------------------
             # DETAILED MODE
-            # ==================================================
+            # ------------------------------------------------
 
-            elif answer_mode == "📄 Detailed Intelligence Report":
+            elif answer_mode == (
+                "📄 Detailed Intelligence Report"
+            ):
 
                 answer = generate_intelligence(
                     question,
@@ -775,21 +759,22 @@ if question:
                 )
 
 
-            # ==================================================
+            # ------------------------------------------------
             # ADVANCED RESEARCH MODE
-            # ==================================================
+            # ------------------------------------------------
 
             else:
 
                 answer = generate_advanced_research(
                     question=question,
                     articles=relevant_articles,
-                    location=location,
+                    location=news_location,
                     topic=topic,
                 )
 
 
         st.markdown(answer)
+
 
     except Exception as error:
 
@@ -803,20 +788,13 @@ if question:
     # ========================================================
     # VISUAL INTELLIGENCE
     # ========================================================
-    #
-    # Runs for:
-    #
-    # ⚡ Smart Concise Intelligence
-    # 📄 Detailed Intelligence Report
-    # 🔬 Advanced Research / Challenging Answer
-    #
-    # The visualization system decides whether
-    # a chart is meaningful.
-    #
 
     st.divider()
 
-    st.subheader("📊 Visual Intelligence")
+    st.subheader(
+        "📊 Visual Intelligence"
+    )
+
 
     try:
 
@@ -824,11 +802,14 @@ if question:
             "📊 Checking whether visualizations are useful..."
         ):
 
-            visualization_result = generate_visualizations(
-                relevant_articles,
-                question,
-                max_graphs=3,
+            visualization_result = (
+                generate_visualizations(
+                    relevant_articles,
+                    question,
+                    max_graphs=3,
+                )
             )
+
 
         if visualization_result:
 
@@ -843,6 +824,7 @@ if question:
                 "for this question and the available data."
             )
 
+
     except Exception as error:
 
         st.warning(
@@ -853,9 +835,6 @@ if question:
     # ========================================================
     # SOURCES
     # ========================================================
-    #
-    # Sources are displayed for all three answer modes.
-    #
 
     st.divider()
 
