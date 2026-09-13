@@ -570,6 +570,55 @@ def show_weather(question_text):
                     ),
                 )
 
+            # ========================================================
+# NATURAL WEATHER ANSWER
+# ========================================================
+
+weather_description = get_weather_description(
+    weather_code
+)
+
+if temperature is not None:
+
+    if temperature <= 5:
+        temperature_feeling = "very cold"
+
+    elif temperature <= 12:
+        temperature_feeling = "quite cold"
+
+    elif temperature <= 18:
+        temperature_feeling = "cool"
+
+    elif temperature <= 25:
+        temperature_feeling = "mild"
+
+    elif temperature <= 32:
+        temperature_feeling = "warm"
+
+    else:
+        temperature_feeling = "hot"
+
+    natural_answer = (
+        f"It's {temperature_feeling} in "
+        f"{extracted_location.title()} right now, "
+        f"with a temperature of {temperature}°C "
+        f"and {weather_description}."
+    )
+
+    if humidity is not None:
+        natural_answer += (
+            f" Humidity is {humidity}%."
+        )
+
+    if wind_speed is not None:
+        natural_answer += (
+            f" Winds are around {wind_speed} km/h."
+        )
+
+    st.info(
+        f"🌤️ {natural_answer}"
+    )
+
             if weather_code is not None:
 
                 st.caption(
