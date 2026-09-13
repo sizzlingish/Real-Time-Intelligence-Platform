@@ -1,3 +1,4 @@
+import re
 import streamlit as st
 
 from news_api import fetch_news
@@ -5,7 +6,6 @@ from gnews_api import fetch_gnews
 from open_meteo_api import fetch_weather
 from retrieval import retrieve_articles
 from ai import generate_intelligence, generate_advanced_research
-
 from visualization import (
     generate_visualizations,
     render_visualizations_in_streamlit,
@@ -13,194 +13,79 @@ from visualization import (
 
 
 # ============================================================
-# PAGE CONFIGURATION
+# PAGE CONFIG
 # ============================================================
 
 st.set_page_config(
     page_title="Real-Time Intelligence Platform",
-    page_icon="🛰️",
+    page_icon="🧠",
     layout="wide",
 )
 
 
 # ============================================================
-# CUSTOM STYLING
+# DARK UI STYLING
 # ============================================================
 
 st.markdown(
     """
     <style>
     .stApp {
-        background:
-            radial-gradient(
-                circle at 50% -15%,
-                #162a4a 0%,
-                #0b1120 40%,
-                #070c16 100%
-            );
-        color: #e2e8f0;
+        background-color: #0e1117;
+        color: #fafafa;
     }
 
     .block-container {
-        max-width: 1100px;
-        padding-top: 2.2rem;
-        padding-bottom: 5rem;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
     }
 
-    h1 {
-        color: #f8fafc !important;
-        font-size: 2.25rem !important;
-        font-weight: 750 !important;
-        letter-spacing: -0.035em;
-        white-space: nowrap;
-        margin-bottom: 0.35rem !important;
-    }
-
-    h2,
-    h3 {
-        color: #f1f5f9 !important;
-    }
-
-    p {
-        color: #cbd5e1;
-    }
-
-    .stCaption {
-        color: #94a3b8 !important;
-    }
-
-    section[data-testid="stSidebar"] {
-        background:
-            linear-gradient(
-                180deg,
-                #08111f 0%,
-                #070c16 100%
-            );
-        border-right: 1px solid #1e293b;
-    }
-
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3 {
-        color: #f8fafc !important;
-    }
-
-    section[data-testid="stSidebar"] p {
-        color: #94a3b8;
-    }
-
-    div[data-baseweb="select"] > div {
-        background-color: #0f172a;
-        border-color: #334155;
-        border-radius: 9px;
-    }
-
-    div[data-baseweb="select"] > div:hover {
-        border-color: #3b82f6;
-    }
-
-    div[role="radiogroup"] label {
-        color: #cbd5e1;
-    }
-
-    div[data-testid="stChatMessage"] {
-        border-radius: 14px;
-        margin-bottom: 0.75rem;
-    }
-
-    div[data-testid="stChatMessage"]:has(
-        div[data-testid="chatAvatarIcon-user"]
-    ) {
-        background-color: #101c31;
-        border: 1px solid #1d3b63;
-        box-shadow:
-            0 4px 18px rgba(0, 0, 0, 0.18);
-    }
-
-    div[data-testid="stChatMessage"]:has(
-        div[data-testid="chatAvatarIcon-assistant"]
-    ) {
-        background-color: #0d1626;
-        border: 1px solid #1e293b;
-        box-shadow:
-            0 4px 18px rgba(0, 0, 0, 0.14);
-    }
-
-    div[data-testid="stChatInput"] {
-        background-color: #0d1728;
-        border: 1px solid #334155;
-        border-radius: 14px;
-        box-shadow:
-            0 8px 30px rgba(0, 0, 0, 0.25);
-    }
-
-    div[data-testid="stChatInput"]:focus-within {
-        border-color: #3b82f6;
-        box-shadow:
-            0 0 0 1px #3b82f6,
-            0 8px 30px rgba(0, 0, 0, 0.25);
-    }
-
-    div[data-testid="stMetric"] {
-        background-color: #0f172a;
-        border: 1px solid #1e293b;
-        border-radius: 12px;
-        padding: 1rem;
-    }
-
-    div[data-testid="stMetric"] label {
-        color: #94a3b8 !important;
-    }
-
-    div[data-testid="stMetricValue"] {
-        color: #f8fafc !important;
-    }
-
-    .stButton > button {
-        background-color: #111827;
-        color: #cbd5e1;
-        border: 1px solid #334155;
-        border-radius: 9px;
-        transition: all 0.15s ease;
-    }
-
-    .stButton > button:hover {
-        background-color: #172554;
-        border-color: #3b82f6;
+    h1, h2, h3 {
         color: #ffffff;
     }
 
-    hr {
-        border-color: #1e293b;
+    .stTextInput input {
+        background-color: #161b22;
+        color: white;
     }
 
-    a {
-        color: #60a5fa !important;
+    .stSelectbox div[data-baseweb="select"] > div {
+        background-color: #161b22;
+        color: white;
     }
 
-    a:hover {
-        color: #93c5fd !important;
+    .stRadio label {
+        color: white;
     }
 
-    div[data-testid="stAlert"] {
+    .source-card {
+        background-color: #161b22;
+        border: 1px solid #30363d;
         border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 12px;
     }
 
-    ::-webkit-scrollbar {
-        width: 8px;
+    .source-card a {
+        color: #58a6ff;
+        text-decoration: none;
     }
 
-    ::-webkit-scrollbar-track {
-        background: #070c16;
+    .weather-card {
+        background-color: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 15px;
     }
 
-    ::-webkit-scrollbar-thumb {
-        background: #24344d;
+    .search-query {
+        background-color: #161b22;
+        border: 1px solid #30363d;
         border-radius: 8px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #334d73;
+        padding: 10px 14px;
+        margin: 10px 0 20px 0;
+        color: #c9d1d9;
     }
     </style>
     """,
@@ -212,31 +97,29 @@ st.markdown(
 # HEADER
 # ============================================================
 
-st.title("Real-Time Intelligence Platform")
+st.title("🧠 Real-Time Intelligence Platform")
 
-st.caption(
-    "Ask about the latest news, compare sources, explore developments, "
-    "check weather, and get AI-powered intelligence."
+st.markdown(
+    """
+    Ask a question and the platform will retrieve recent news,
+    analyze the evidence, compare sources, and generate intelligence.
+    Weather questions are handled automatically.
+    """
 )
 
 
 # ============================================================
-# SIDEBAR SETTINGS
+# SIDEBAR
 # ============================================================
 
 with st.sidebar:
 
     st.header("⚙️ Intelligence Settings")
 
-    # --------------------------------------------------------
-    # NEWS LOCATION
-    # --------------------------------------------------------
-
     news_location = st.selectbox(
         "🌍 News Search Location",
         [
             "No specific location",
-            "Worldwide",
             "Pakistan",
             "India",
             "US",
@@ -247,11 +130,8 @@ with st.sidebar:
             "Islamabad",
         ],
         index=0,
+        help="This setting affects news searches only. Weather location comes from your question.",
     )
-
-    # --------------------------------------------------------
-    # TOPIC
-    # --------------------------------------------------------
 
     topic = st.selectbox(
         "📰 Topic",
@@ -271,10 +151,6 @@ with st.sidebar:
         index=0,
     )
 
-    # --------------------------------------------------------
-    # ANSWER MODE
-    # --------------------------------------------------------
-
     answer_mode = st.radio(
         "🧠 Answer Mode",
         [
@@ -285,36 +161,31 @@ with st.sidebar:
         index=0,
     )
 
-    # --------------------------------------------------------
-    # ARTICLE LIMIT
-    # --------------------------------------------------------
-
     if answer_mode == "⚡ Smart Concise Intelligence":
-
-        article_limit = st.slider(
-            "📚 Number of Articles to Analyze",
-            min_value=5,
-            max_value=15,
-            value=8,
-        )
+        default_articles = 8
+        max_articles = 15
 
     elif answer_mode == "📄 Detailed Intelligence Report":
-
-        article_limit = st.slider(
-            "📚 Number of Articles to Analyze",
-            min_value=5,
-            max_value=20,
-            value=12,
-        )
+        default_articles = 12
+        max_articles = 20
 
     else:
+        default_articles = 18
+        max_articles = 25
 
-        article_limit = st.slider(
-            "📚 Number of Articles to Analyze",
-            min_value=8,
-            max_value=25,
-            value=18,
-        )
+    article_limit = st.slider(
+        "📚 Number of Articles to Analyze",
+        min_value=5,
+        max_value=max_articles,
+        value=default_articles,
+    )
+
+    st.divider()
+
+    st.caption(
+        "💡 Weather searches are automatic. "
+        "Try: “What is the weather in London?”"
+    )
 
 
 # ============================================================
@@ -322,6 +193,9 @@ with st.sidebar:
 # ============================================================
 
 def is_weather_question(text):
+    """
+    Detect whether the user's question is about weather.
+    """
 
     weather_words = [
         "weather",
@@ -331,163 +205,330 @@ def is_weather_question(text):
         "raining",
         "humidity",
         "wind",
+        "windy",
         "hot",
         "cold",
+        "snow",
+        "storm",
+        "sunny",
+        "cloudy",
     ]
 
     text = text.lower()
 
     return any(
-        word in text
+        re.search(r"\b" + re.escape(word) + r"\b", text)
         for word in weather_words
     )
+
+
+# ============================================================
+# WEATHER LOCATION EXTRACTION
+# ============================================================
+
+def extract_weather_location(question):
+    """
+    Extract a likely location from common weather questions.
+
+    Examples:
+        weather in London
+        temperature in Karachi
+        forecast for Islamabad
+        weather of New York
+    """
+
+    patterns = [
+        r"\bweather\s+(?:in|at|for|of)\s+(.+?)(?:\?|$)",
+        r"\btemperature\s+(?:in|at|for|of)\s+(.+?)(?:\?|$)",
+        r"\bforecast\s+(?:in|at|for|of)\s+(.+?)(?:\?|$)",
+        r"\braining\s+(?:in|at|for|of)\s+(.+?)(?:\?|$)",
+        r"\bwind\s+(?:in|at|for|of)\s+(.+?)(?:\?|$)",
+        r"\bhumidity\s+(?:in|at|for|of)\s+(.+?)(?:\?|$)",
+        r"\bhot\s+(?:in|at|for|of)\s+(.+?)(?:\?|$)",
+        r"\bcold\s+(?:in|at|for|of)\s+(.+?)(?:\?|$)",
+        r"\bweather\s+(?:today|tomorrow)\s+(?:in|at|for)\s+(.+?)(?:\?|$)",
+    ]
+
+    for pattern in patterns:
+        match = re.search(
+            pattern,
+            question,
+            flags=re.IGNORECASE,
+        )
+
+        if match:
+            location = match.group(1).strip()
+
+            # Remove common trailing phrases.
+            location = re.sub(
+                r"\b(today|tomorrow|right now|now)\b",
+                "",
+                location,
+                flags=re.IGNORECASE,
+            )
+
+            location = location.strip(" ,.")
+
+            if location:
+                return location
+
+    return None
 
 
 # ============================================================
 # WEATHER DISPLAY
 # ============================================================
 
-def show_weather(question_text):
+def show_weather(question):
 
-    import re
+    weather_location = extract_weather_location(question)
 
-    text = question_text.strip()
-
-    patterns = [
-
-        r"weather\s+(?:in|at|for)\s+(.+)",
-
-        r"temperature\s+(?:in|at|for)\s+(.+)",
-
-        r"forecast\s+(?:in|at|for)\s+(.+)",
-
-        r"weather\s+(.+)",
-
-        r"temperature\s+(.+)",
-
-        r"forecast\s+(.+)",
-
-        r"how(?:'s| is)\s+the\s+weather(?:\s+like)?\s+(?:in|at|for)\s+(.+)",
-
-        r"what(?:'s| is)\s+the\s+weather(?:\s+like)?\s+(?:in|at|for)\s+(.+)",
-    ]
-
-    extracted_location = None
-
-    for pattern in patterns:
-
-        match = re.search(
-            pattern,
-            text,
-            re.IGNORECASE,
-        )
-
-        if match:
-
-            extracted_location = match.group(
-                match.lastindex
-            ).strip()
-
-            break
-
-    if extracted_location:
-
-        extracted_location = (
-            extracted_location
-            .rstrip("?.!,")
-            .strip()
-        )
-
-    if not extracted_location:
-
+    if not weather_location:
         st.warning(
-            "Please include a location, for example: "
-            "`What is the weather in London?`"
+            "I detected a weather question, but I couldn't determine "
+            "the location. Try something like: "
+            "“What is the weather in London?”"
         )
-
         return
 
-    with st.spinner(
-        "🌤️ Getting weather information..."
-    ):
+    st.subheader(f"🌤️ Weather — {weather_location}")
 
-        try:
+    try:
+        weather_data = fetch_weather(
+            location=weather_location
+        )
 
-            weather_data = fetch_weather(
-                location=extracted_location
-            )
+        current = weather_data.get("current", {})
 
-            current = weather_data.get(
-                "current",
-                {}
-            )
+        temperature = current.get("temperature_2m")
+        humidity = current.get("relative_humidity_2m")
+        wind_speed = current.get("wind_speed_10m")
+        weather_code = current.get("weather_code")
 
-            temperature = current.get(
-                "temperature_2m"
-            )
+        st.markdown(
+            '<div class="weather-card">',
+            unsafe_allow_html=True,
+        )
 
-            humidity = current.get(
-                "relative_humidity_2m"
-            )
+        col1, col2, col3, col4 = st.columns(4)
 
-            wind_speed = current.get(
-                "wind_speed_10m"
-            )
-
-            weather_code = current.get(
-                "weather_code"
-            )
-
-            st.subheader(
-                f"🌤️ Weather in {extracted_location.title()}"
-            )
-
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-
+        with col1:
+            if temperature is not None:
                 st.metric(
-                    "Temperature",
-                    (
-                        f"{temperature} °C"
-                        if temperature is not None
-                        else "N/A"
-                    ),
+                    "🌡️ Temperature",
+                    f"{temperature} °C",
+                )
+            else:
+                st.metric(
+                    "🌡️ Temperature",
+                    "N/A",
                 )
 
-            with col2:
-
+        with col2:
+            if humidity is not None:
                 st.metric(
-                    "Humidity",
-                    (
-                        f"{humidity}%"
-                        if humidity is not None
-                        else "N/A"
-                    ),
+                    "💧 Humidity",
+                    f"{humidity}%",
+                )
+            else:
+                st.metric(
+                    "💧 Humidity",
+                    "N/A",
                 )
 
-            with col3:
-
+        with col3:
+            if wind_speed is not None:
                 st.metric(
-                    "Wind",
-                    (
-                        f"{wind_speed} km/h"
-                        if wind_speed is not None
-                        else "N/A"
-                    ),
+                    "💨 Wind Speed",
+                    f"{wind_speed} km/h",
+                )
+            else:
+                st.metric(
+                    "💨 Wind Speed",
+                    "N/A",
                 )
 
+        with col4:
             if weather_code is not None:
-
-                st.caption(
-                    f"Weather code: {weather_code}"
+                st.metric(
+                    "☁️ Weather Code",
+                    str(weather_code),
+                )
+            else:
+                st.metric(
+                    "☁️ Weather Code",
+                    "N/A",
                 )
 
-        except Exception as error:
+        st.markdown("</div>", unsafe_allow_html=True)
 
-            st.error(
-                f"Unable to retrieve weather information: {error}"
-            )
+    except Exception as e:
+        st.error(
+            f"Weather request failed: {e}"
+        )
+
+
+# ============================================================
+# NEWS QUERY CLEANING
+# ============================================================
+
+def build_news_search_query(question, location, topic):
+    """
+    Convert a natural-language user question into a short,
+    API-friendly news search query.
+
+    The original question is NOT changed. This function only
+    creates the query sent to NewsData and GNews.
+    """
+
+    # Remove URLs.
+    query = re.sub(
+        r"https?://\S+|www\.\S+",
+        " ",
+        question,
+        flags=re.IGNORECASE,
+    )
+
+    # Replace punctuation with spaces.
+    query = re.sub(
+        r"[^\w\s-]",
+        " ",
+        query,
+    )
+
+    query = query.lower()
+
+    # Common conversational/search-stop words.
+    stop_words = {
+        "what",
+        "what's",
+        "whats",
+        "why",
+        "how",
+        "when",
+        "where",
+        "who",
+        "which",
+        "whose",
+        "is",
+        "are",
+        "was",
+        "were",
+        "be",
+        "been",
+        "being",
+        "do",
+        "does",
+        "did",
+        "can",
+        "could",
+        "will",
+        "would",
+        "should",
+        "may",
+        "might",
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "but",
+        "if",
+        "then",
+        "than",
+        "to",
+        "of",
+        "for",
+        "in",
+        "on",
+        "at",
+        "by",
+        "with",
+        "from",
+        "into",
+        "about",
+        "this",
+        "that",
+        "these",
+        "those",
+        "it",
+        "its",
+        "they",
+        "their",
+        "them",
+        "we",
+        "our",
+        "you",
+        "your",
+        "i",
+        "me",
+        "my",
+        "recent",
+        "reports",
+        "report",
+        "suggest",
+        "suggests",
+        "according",
+        "latest",
+        "currently",
+        "current",
+    }
+
+    words = query.split()
+
+    important_words = [
+        word
+        for word in words
+        if word not in stop_words
+        and len(word) > 2
+    ]
+
+    # Remove duplicate words while preserving order.
+    unique_words = []
+
+    for word in important_words:
+        if word not in unique_words:
+            unique_words.append(word)
+
+    # Add sidebar location only when explicitly selected.
+    if location not in [
+        "No specific location",
+        "Worldwide",
+        "",
+        None,
+    ]:
+        location_words = re.sub(
+            r"[^\w\s-]",
+            " ",
+            location.lower(),
+        ).split()
+
+        for word in location_words:
+            if word not in unique_words:
+                unique_words.insert(0, word)
+
+    # Add selected topic when not "All Topics".
+    if topic not in [
+        "All Topics",
+        "",
+        None,
+    ]:
+        topic_words = re.sub(
+            r"[^\w\s-]",
+            " ",
+            topic.lower(),
+        ).split()
+
+        for word in reversed(topic_words):
+            if word not in unique_words:
+                unique_words.insert(0, word)
+
+    # Keep news API queries reasonably short.
+    unique_words = unique_words[:12]
+
+    search_query = " ".join(unique_words).strip()
+
+    return search_query
 
 
 # ============================================================
@@ -499,179 +540,165 @@ def render_sources(articles):
     if not articles:
         return
 
-    st.subheader("📚 Sources")
+    st.subheader("📰 Sources")
 
-    for index, article in enumerate(
-        articles,
-        start=1,
-    ):
+    for article in articles:
 
         title = article.get(
             "title",
-            "Untitled article"
+            "Untitled",
         )
 
         source = article.get(
             "source",
-            "Unknown source"
+            "Unknown source",
         )
 
         published = article.get(
             "published",
-            "Unknown date"
+            "Unknown date",
         )
 
-        url = article.get("url")
+        url = article.get(
+            "url",
+            "",
+        )
 
-        source_text = (
-            f"**{index}. {title}**  \n"
+        st.markdown(
+            '<div class="source-card">',
+            unsafe_allow_html=True,
+        )
+
+        st.markdown(
+            f"**{title}**"
+        )
+
+        st.caption(
             f"{source} • {published}"
         )
 
         if url:
-
             st.markdown(
-                f"{source_text}  \n"
-                f"[Read article]({url})"
+                f"[🔗 Read article]({url})"
             )
 
-        else:
-
-            st.markdown(
-                source_text
-            )
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True,
+        )
 
 
 # ============================================================
-# CHAT INPUT
+# USER QUESTION
 # ============================================================
 
-question = st.chat_input(
-    "Ask about the latest news or weather..."
+question = st.text_input(
+    "🔎 Ask your question",
+    placeholder=(
+        "Example: What are the biggest risks and benefits "
+        "of AI for jobs?"
+    ),
 )
 
 
 # ============================================================
-# MAIN QUESTION PROCESSING
+# MAIN PIPELINE
 # ============================================================
 
 if question:
 
-    # ========================================================
-    # WEATHER
-    # ========================================================
+    question = question.strip()
+
+    if not question:
+        st.warning("Please enter a question.")
+        st.stop()
+
+    # --------------------------------------------------------
+    # WEATHER PIPELINE
+    # --------------------------------------------------------
 
     if is_weather_question(question):
 
         show_weather(question)
 
+        # Weather questions should not trigger the news pipeline.
         st.stop()
 
+    # --------------------------------------------------------
+    # NEWS SEARCH QUERY
+    # --------------------------------------------------------
 
-    # ========================================================
-    # BUILD NEWS SEARCH QUERY
-    # ========================================================
-
-    search_parts = []
-
-
-    # Add location only if the user selected one
-    if news_location not in [
-        "No specific location",
-        "Worldwide",
-    ]:
-
-        search_parts.append(
-            news_location
-        )
-
-
-    # Add topic only if the user selected one
-    if topic != "All Topics":
-
-        search_parts.append(
-            topic
-        )
-
-
-    # Always include the actual user question
-    search_parts.append(
-        question
+    search_query = build_news_search_query(
+        question=question,
+        location=news_location,
+        topic=topic,
     )
 
+    if not search_query:
+        st.warning(
+            "I couldn't create a useful news search query "
+            "from your question. Try adding a few specific keywords."
+        )
+        st.stop()
 
-    search_query = " ".join(
-        search_parts
+    # Show the query being used for transparency.
+    st.markdown(
+        f"""
+        <div class="search-query">
+        🔎 <strong>News search:</strong> {search_query}
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-
-    # ========================================================
+    # --------------------------------------------------------
     # FETCH NEWS
-    # ========================================================
+    # --------------------------------------------------------
 
     all_articles = []
 
     newsdata_error = None
     gnews_error = None
 
+    # NewsData
+    try:
 
-    # --------------------------------------------------------
-    # NEWSDATA
-    # --------------------------------------------------------
+        newsdata_articles = fetch_news(
+            query=search_query,
+            language="en",
+            limit=article_limit,
+        )
 
-    with st.spinner(
-        "📰 Searching NewsData..."
-    ):
-
-        try:
-
-            newsdata_articles = fetch_news(
-                query=search_query,
-                language="en",
-                limit=article_limit,
+        if newsdata_articles:
+            all_articles.extend(
+                newsdata_articles
             )
 
-            if newsdata_articles:
+    except Exception as e:
 
-                all_articles.extend(
-                    newsdata_articles
-                )
+        newsdata_error = str(e)
 
-        except Exception as error:
+    # GNews
+    try:
 
-            newsdata_error = str(error)
+        gnews_articles = fetch_gnews(
+            query=search_query,
+            language="en",
+            max_results=article_limit,
+        )
 
-
-    # --------------------------------------------------------
-    # GNEWS
-    # --------------------------------------------------------
-
-    with st.spinner(
-        "🌐 Searching GNews..."
-    ):
-
-        try:
-
-            gnews_articles = fetch_gnews(
-                query=search_query,
-                language="en",
-                max_results=article_limit,
+        if gnews_articles:
+            all_articles.extend(
+                gnews_articles
             )
 
-            if gnews_articles:
+    except Exception as e:
 
-                all_articles.extend(
-                    gnews_articles
-                )
+        gnews_error = str(e)
 
-        except Exception as error:
-
-            gnews_error = str(error)
-
-
-    # ========================================================
-    # NO ARTICLES
-    # ========================================================
+    # --------------------------------------------------------
+    # CHECK API RESULTS
+    # --------------------------------------------------------
 
     if not all_articles:
 
@@ -680,23 +707,25 @@ if question:
         )
 
         if newsdata_error:
-
-            st.caption(
+            st.warning(
                 f"NewsData: {newsdata_error}"
             )
 
         if gnews_error:
-
-            st.caption(
+            st.warning(
                 f"GNews: {gnews_error}"
             )
 
+        st.info(
+            "Try a shorter search-oriented question such as "
+            "“AI impact on jobs”."
+        )
+
         st.stop()
 
-
-    # ========================================================
-    # RETRIEVE MOST RELEVANT ARTICLES
-    # ========================================================
+    # --------------------------------------------------------
+    # RETRIEVE / DEDUPLICATE / RANK
+    # --------------------------------------------------------
 
     relevant_articles = retrieve_articles(
         all_articles,
@@ -704,140 +733,91 @@ if question:
         max_articles=article_limit,
     )
 
-
     if not relevant_articles:
 
-        st.warning(
-            "No relevant articles were found."
-        )
-
-        st.stop()
-
-
-    # ========================================================
-    # AI INTELLIGENCE
-    # ========================================================
-
-    st.subheader(
-        "🧠 Intelligence"
-    )
-
-
-    try:
-
-        with st.spinner(
-            "🤖 Generating intelligence..."
-        ):
-
-            # ------------------------------------------------
-            # CONCISE MODE
-            # ------------------------------------------------
-
-            if answer_mode == (
-                "⚡ Smart Concise Intelligence"
-            ):
-
-                answer = generate_intelligence(
-                    question,
-                    relevant_articles,
-                    concise=True,
-                )
-
-
-            # ------------------------------------------------
-            # DETAILED MODE
-            # ------------------------------------------------
-
-            elif answer_mode == (
-                "📄 Detailed Intelligence Report"
-            ):
-
-                answer = generate_intelligence(
-                    question,
-                    relevant_articles,
-                    concise=False,
-                )
-
-
-            # ------------------------------------------------
-            # ADVANCED RESEARCH MODE
-            # ------------------------------------------------
-
-            else:
-
-                answer = generate_advanced_research(
-                    question=question,
-                    articles=relevant_articles,
-                    location=news_location,
-                    topic=topic,
-                )
-
-
-        st.markdown(answer)
-
-
-    except Exception as error:
-
         st.error(
-            f"Unable to generate intelligence: {error}"
+            "News articles were retrieved, but none were "
+            "relevant enough to analyze."
         )
-
         st.stop()
 
-
-    # ========================================================
-    # VISUAL INTELLIGENCE
-    # ========================================================
-
-    st.divider()
-
-    st.subheader(
-        "📊 Visual Intelligence"
+    st.success(
+        f"Retrieved {len(relevant_articles)} relevant articles."
     )
 
+    # --------------------------------------------------------
+    # AI ANALYSIS
+    # --------------------------------------------------------
 
     try:
 
-        with st.spinner(
-            "📊 Checking whether visualizations are useful..."
-        ):
+        if answer_mode == "⚡ Smart Concise Intelligence":
 
-            visualization_result = (
-                generate_visualizations(
-                    relevant_articles,
-                    question,
-                    max_graphs=3,
-                )
+            intelligence = generate_intelligence(
+                question=question,
+                articles=relevant_articles,
+                concise=True,
             )
 
+        elif answer_mode == "📄 Detailed Intelligence Report":
 
-        if visualization_result:
-
-            render_visualizations_in_streamlit(
-                visualization_result
+            intelligence = generate_intelligence(
+                question=question,
+                articles=relevant_articles,
+                concise=False,
             )
 
         else:
 
-            st.info(
-                "No meaningful visualization was found "
-                "for this question and the available data."
+            intelligence = generate_advanced_research(
+                question=question,
+                articles=relevant_articles,
+                location=news_location,
+                topic=topic,
             )
 
+    except Exception as e:
 
-    except Exception as error:
+        st.error(
+            f"AI analysis failed: {e}"
+        )
+        st.stop()
 
-        st.warning(
-            f"Visualization could not be generated: {error}"
+    # --------------------------------------------------------
+    # INTELLIGENCE RESULT
+    # --------------------------------------------------------
+
+    st.subheader("🧠 Intelligence")
+
+    st.markdown(intelligence)
+
+    # --------------------------------------------------------
+    # VISUALIZATIONS
+    # --------------------------------------------------------
+
+    try:
+
+        visualizations = generate_visualizations(
+            relevant_articles,
+            question,
         )
 
+        if visualizations:
 
-    # ========================================================
+            st.subheader("📊 Visual Intelligence")
+
+            render_visualizations_in_streamlit(
+                visualizations
+            )
+
+    except Exception as e:
+
+        st.warning(
+            f"Visualizations could not be generated: {e}"
+        )
+
+    # --------------------------------------------------------
     # SOURCES
-    # ========================================================
+    # --------------------------------------------------------
 
-    st.divider()
-
-    render_sources(
-        relevant_articles
-    )
+    render_sources(relevant_articles)
