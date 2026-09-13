@@ -340,13 +340,17 @@ def is_weather_question(text):
         "forecast",
         "rain",
         "raining",
+        "rainy",
         "humidity",
         "wind",
         "windy",
         "hot",
         "cold",
+        "warm",
+        "cool",
         "snow",
         "snowing",
+        "snowy",
         "storm",
         "sunny",
         "cloudy",
@@ -373,28 +377,76 @@ def extract_weather_location(question_text):
 
     patterns = [
 
+        # Weather
         r"weather\s+(?:in|at|for|of)\s+(.+)",
-
-        r"temperature\s+(?:in|at|for|of)\s+(.+)",
-
-        r"forecast\s+(?:in|at|for|of)\s+(.+)",
-
         r"weather\s+(.+)",
 
+        # Temperature
+        r"temperature\s+(?:in|at|for|of)\s+(.+)",
         r"temperature\s+(.+)",
 
+        # Forecast
+        r"forecast\s+(?:in|at|for|of)\s+(.+)",
         r"forecast\s+(.+)",
 
+        # How is the weather
         r"how(?:'s| is)\s+the\s+weather"
         r"(?:\s+like)?\s+(?:in|at|for|of)\s+(.+)",
 
+        # What is the weather
         r"what(?:'s| is)\s+the\s+weather"
         r"(?:\s+like)?\s+(?:in|at|for|of)\s+(.+)",
+
+        # Is it hot/cold/raining/etc.
+        r"(?:is|will)\s+it\s+"
+        r"(?:cold|hot|warm|cool|raining|rainy|snowing|snowy|windy|sunny|cloudy)"
+        r"\s+(?:in|at|for)\s+(.+)",
+
+        # "How cold is it in London?"
+        r"how\s+(?:cold|hot|warm|cool)\s+is\s+it"
+        r"\s+(?:in|at|for)\s+(.+)",
+
+        # "Is London cold?"
+        r"is\s+(.+?)\s+"
+        r"(?:cold|hot|warm|cool|raining|rainy|snowing|snowy|windy|sunny|cloudy)"
+        r"\s*\??$",
 
     ]
 
     extracted_location = None
 
+    for pattern in patterns:
+
+        match = re.search(
+            pattern,
+            text,
+            re.IGNORECASE,
+        )
+
+        if match:
+
+            extracted_location = match.group(
+                match.lastindex
+            ).strip()
+
+            break
+
+    if extracted_location:
+
+        extracted_location = (
+            extracted_location
+            .rstrip("?.!,")
+            .strip()
+        )
+
+        extracted_location = re.sub(
+            r"\b(today|tomorrow|right now|now)\b",
+            "",
+            extracted_location,
+            flags=re.IGNORECASE,
+        ).strip()
+
+    return extracted_location
     for pattern in patterns:
 
         match = re.search(
