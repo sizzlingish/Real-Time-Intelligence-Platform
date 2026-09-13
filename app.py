@@ -4,7 +4,10 @@ from news_api import fetch_news
 from gnews_api import fetch_gnews
 from open_meteo_api import fetch_weather
 from retrieval import retrieve_articles
-from ai import generate_intelligence
+from ai import (
+    generate_intelligence,
+    generate_advanced_research,
+)
 
 from visualization import (
     generate_visualizations,
@@ -21,6 +24,7 @@ st.set_page_config(
     page_icon="🛰️",
     layout="wide",
 )
+
 
 # ============================================================
 # PROFESSIONAL RTIP STYLING
@@ -268,8 +272,6 @@ st.markdown(
 )
 
 
-
-
 # ============================================================
 # HEADER
 # ============================================================
@@ -328,15 +330,38 @@ with st.sidebar:
         [
             "⚡ Smart Concise Intelligence",
             "📄 Detailed Intelligence Report",
+            "🔬 Advanced Research / Challenging Answer",
         ],
         index=0,
     )
 
+
+    # ========================================================
+    # ARTICLE LIMIT BASED ON ANSWER MODE
+    # ========================================================
+
+    if answer_mode == "⚡ Smart Concise Intelligence":
+
+        default_article_limit = 8
+        max_article_limit = 15
+
+    elif answer_mode == "📄 Detailed Intelligence Report":
+
+        default_article_limit = 12
+        max_article_limit = 20
+
+    else:
+
+        default_article_limit = 18
+        max_article_limit = 25
+
+
     article_limit = st.slider(
-        "📚 Articles to retrieve",
+        "📚 Number of Articles to Analyze",
         min_value=5,
-        max_value=20,
-        value=15,
+        max_value=max_article_limit,
+        value=default_article_limit,
+        step=1,
     )
 
 
@@ -364,7 +389,6 @@ def is_weather_question(text):
         word in text
         for word in weather_words
     )
-
 
 
 # ============================================================
@@ -687,10 +711,20 @@ if question:
     # RETRIEVE RELEVANT ARTICLES
     # ========================================================
 
+    # Important:
+    #
+    # The old code always used max_articles=8.
+    #
+    # That would prevent Advanced Research mode
+    # from actually using the additional articles.
+    #
+    # We now retrieve according to the selected
+    # article limit.
+
     relevant_articles = retrieve_articles(
         all_articles,
         question,
-        max_articles=8,
+        max_articles=article_limit,
     )
 
 
@@ -715,13 +749,9 @@ if question:
             "🤖 Generating intelligence..."
         ):
 
-            # IMPORTANT:
-            #
-            # Concise mode explicitly sends:
-            # concise=True
-            #
-            # Detailed mode explicitly sends:
-            # concise=False
+            # ==================================================
+            # CONCISE MODE
+            # ==================================================
 
             if answer_mode == "⚡ Smart Concise Intelligence":
 
@@ -731,13 +761,33 @@ if question:
                     concise=True,
                 )
 
-            else:
+
+            # ==================================================
+            # DETAILED MODE
+            # ==================================================
+
+            elif answer_mode == "📄 Detailed Intelligence Report":
 
                 answer = generate_intelligence(
                     question,
                     relevant_articles,
                     concise=False,
                 )
+
+
+            # ==================================================
+            # ADVANCED RESEARCH MODE
+            # ==================================================
+
+            else:
+
+                answer = generate_advanced_research(
+                    question=question,
+                    articles=relevant_articles,
+                    location=location,
+                    topic=topic,
+                )
+
 
         st.markdown(answer)
 
@@ -754,16 +804,13 @@ if question:
     # VISUAL INTELLIGENCE
     # ========================================================
     #
-    # IMPORTANT:
+    # Runs for:
     #
-    # This is NOT inside an answer-mode condition.
+    # ⚡ Smart Concise Intelligence
+    # 📄 Detailed Intelligence Report
+    # 🔬 Advanced Research / Challenging Answer
     #
-    # Therefore the visualization system runs for:
-    #
-    # ⚡ Concise
-    # 📄 Detailed
-    #
-    # The visualization system itself decides whether
+    # The visualization system decides whether
     # a chart is meaningful.
     #
 
@@ -807,9 +854,7 @@ if question:
     # SOURCES
     # ========================================================
     #
-    # Sources are also outside the answer-mode condition.
-    #
-    # Both Concise and Detailed receive sources.
+    # Sources are displayed for all three answer modes.
     #
 
     st.divider()
@@ -817,4 +862,3 @@ if question:
     render_sources(
         relevant_articles
     )
-
