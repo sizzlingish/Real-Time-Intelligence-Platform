@@ -2,9 +2,9 @@ import re
 from difflib import SequenceMatcher
 
 
-# --------------------------------------------------
-# Text Cleaning
-# --------------------------------------------------
+# ============================================================
+# TEXT CLEANING
+# ============================================================
 
 def clean_text(text):
     """
@@ -14,24 +14,33 @@ def clean_text(text):
     if not text:
         return ""
 
-    text = text.lower()
+    text = str(text).lower()
 
     # Remove punctuation
-    text = re.sub(r"[^\w\s]", " ", text)
+    text = re.sub(
+        r"[^\w\s]",
+        " ",
+        text
+    )
 
     # Remove extra spaces
-    text = re.sub(r"\s+", " ", text).strip()
+    text = re.sub(
+        r"\s+",
+        " ",
+        text
+    ).strip()
 
     return text
 
 
-# --------------------------------------------------
-# Calculate Similarity
-# --------------------------------------------------
+# ============================================================
+# CALCULATE SIMILARITY
+# ============================================================
 
 def similarity(text1, text2):
     """
     Calculate similarity between two pieces of text.
+
     Returns a value between 0 and 1.
     """
 
@@ -48,13 +57,20 @@ def similarity(text1, text2):
     ).ratio()
 
 
-# --------------------------------------------------
-# Remove Duplicate Articles
-# --------------------------------------------------
+# ============================================================
+# REMOVE DUPLICATE ARTICLES
+# ============================================================
 
-def remove_duplicates(articles, similarity_threshold=0.85):
+def remove_duplicates(
+    articles,
+    similarity_threshold=0.85
+):
     """
     Remove duplicate or highly similar news articles.
+
+    Duplicate detection uses:
+    1. URL
+    2. Article title similarity
     """
 
     unique_articles = []
@@ -64,18 +80,21 @@ def remove_duplicates(articles, similarity_threshold=0.85):
     for article in articles:
 
         url = article.get("url")
-        title = article.get("title", "")
+        title = article.get(
+            "title",
+            ""
+        )
 
-        # ------------------------------------------
-        # URL duplicate check
-        # ------------------------------------------
+        # ----------------------------------------------------
+        # URL DUPLICATE CHECK
+        # ----------------------------------------------------
 
         if url and url in seen_urls:
             continue
 
-        # ------------------------------------------
-        # Title duplicate check
-        # ------------------------------------------
+        # ----------------------------------------------------
+        # TITLE DUPLICATE CHECK
+        # ----------------------------------------------------
 
         duplicate = False
 
@@ -97,22 +116,32 @@ def remove_duplicates(articles, similarity_threshold=0.85):
         if duplicate:
             continue
 
+        # Save URL for future duplicate checks
         if url:
             seen_urls.add(url)
 
-        unique_articles.append(article)
+        unique_articles.append(
+            article
+        )
 
     return unique_articles
 
 
-# --------------------------------------------------
-# Calculate Relevance
-# --------------------------------------------------
+# ============================================================
+# CALCULATE RELEVANCE
+# ============================================================
 
-def calculate_relevance(article, question):
+def calculate_relevance(
+    article,
+    question
+):
     """
     Calculate a simple relevance score based on
-    keywords appearing in the user's question.
+    keywords appearing in the article title
+    and description.
+
+    Higher score = more question keywords
+    found in the article.
     """
 
     question_words = set(
@@ -123,22 +152,30 @@ def calculate_relevance(article, question):
         return 0
 
     title = clean_text(
-        article.get("title", "")
+        article.get(
+            "title",
+            ""
+        )
     )
 
     description = clean_text(
-        article.get("description", "")
+        article.get(
+            "description",
+            ""
+        )
     )
 
     article_text = (
-        title + " " + description
+        title
+        + " "
+        + description
     )
 
     article_words = set(
         article_text.split()
     )
 
-    # Count matching words
+    # Count matching keywords
     matches = question_words.intersection(
         article_words
     )
@@ -146,11 +183,14 @@ def calculate_relevance(article, question):
     return len(matches)
 
 
-# --------------------------------------------------
-# Rank Articles
-# --------------------------------------------------
+# ============================================================
+# RANK ARTICLES
+# ============================================================
 
-def rank_articles(articles, question):
+def rank_articles(
+    articles,
+    question
+):
     """
     Rank articles according to their relevance
     to the user's question.
@@ -167,7 +207,9 @@ def rank_articles(articles, question):
 
         article_copy = article.copy()
 
-        article_copy["relevance_score"] = score
+        article_copy[
+            "relevance_score"
+        ] = score
 
         ranked_articles.append(
             article_copy
@@ -175,24 +217,52 @@ def rank_articles(articles, question):
 
     # Highest relevance first
     ranked_articles.sort(
-        key=lambda x: x["relevance_score"],
+        key=lambda x: x.get(
+            "relevance_score",
+            0
+        ),
         reverse=True
     )
 
     return ranked_articles
 
 
-# --------------------------------------------------
-# Retrieve Relevant Articles
-# --------------------------------------------------
+# ============================================================
+# RETRIEVE RELEVANT ARTICLES
+# ============================================================
 
 def retrieve_articles(
     articles,
     question,
     max_articles=8
 ):
+    """
+    Retrieve the best available articles.
+
+    Pipeline:
+
+    Articles
+        ↓
+    Validate articles
+        ↓
+    Remove duplicates
+        ↓
+    Calculate relevance
+        ↓
+    Rank articles
+        ↓
+    Return top articles
+    """
+
     if not articles:
         return []
+
+    if not question:
+        return []
+
+    # --------------------------------------------------------
+    # VALIDATE ARTICLES
+    # --------------------------------------------------------
 
     valid_articles = [
         article
@@ -203,39 +273,26 @@ def retrieve_articles(
     if not valid_articles:
         return []
 
-    unique_articles = remove_duplicates(valid_articles)
-    ranked_articles = rank_articles(
-        unique_articles,
-        question
-    )
-
-    # Always return the best available articles.
-    # Do not discard them just because the keyword
-    # relevance score is low.
-    selected_articles = ranked_articles[:max_articles]
-
-    return selected_articles
-
-    # ------------------------------------------
-    # Remove duplicates
-    # ------------------------------------------
+    # --------------------------------------------------------
+    # REMOVE DUPLICATES
+    # --------------------------------------------------------
 
     unique_articles = remove_duplicates(
         valid_articles
     )
 
-    # ------------------------------------------
-    # Rank articles
-    # ------------------------------------------
+    # --------------------------------------------------------
+    # RANK ARTICLES
+    # --------------------------------------------------------
 
     ranked_articles = rank_articles(
         unique_articles,
         question
     )
 
-    # ------------------------------------------
-    # Select top articles
-    # ------------------------------------------
+    # --------------------------------------------------------
+    # SELECT TOP ARTICLES
+    # --------------------------------------------------------
 
     selected_articles = ranked_articles[
         :max_articles
@@ -244,40 +301,55 @@ def retrieve_articles(
     return selected_articles
 
 
-# --------------------------------------------------
-# Simple Test
-# --------------------------------------------------
+# ============================================================
+# SIMPLE TEST
+# ============================================================
 
 if __name__ == "__main__":
 
     test_articles = [
 
         {
-            "title": "Pakistan announces new economic policy",
-            "description": "Government announces changes to the economy.",
+            "title": (
+                "Pakistan announces new economic policy"
+            ),
+            "description": (
+                "Government announces changes "
+                "to the economy."
+            ),
             "url": "https://example.com/1",
             "source": "News Source A",
-            "published": "2026-09-12"
+            "published": "2026-09-12",
         },
 
         {
-            "title": "Pakistan announces new economic policy",
-            "description": "Government announces economic changes.",
+            "title": (
+                "Pakistan announces new economic policy"
+            ),
+            "description": (
+                "Government announces economic changes."
+            ),
             "url": "https://example.com/2",
             "source": "News Source B",
-            "published": "2026-09-12"
+            "published": "2026-09-12",
         },
 
         {
-            "title": "Pakistan cricket team wins match",
-            "description": "Pakistan wins an important cricket match.",
+            "title": (
+                "Pakistan cricket team wins match"
+            ),
+            "description": (
+                "Pakistan wins an important cricket match."
+            ),
             "url": "https://example.com/3",
             "source": "Sports News",
-            "published": "2026-09-12"
-        }
+            "published": "2026-09-12",
+        },
     ]
 
-    question = "What is happening with Pakistan's economy?"
+    question = (
+        "What is happening with Pakistan's economy?"
+    )
 
     results = retrieve_articles(
         test_articles,
@@ -285,7 +357,9 @@ if __name__ == "__main__":
         max_articles=5
     )
 
-    print("\nRetrieved Articles:\n")
+    print(
+        "\nRetrieved Articles:\n"
+    )
 
     for article in results:
 
@@ -294,7 +368,7 @@ if __name__ == "__main__":
         )
 
         print(
-            f"Relevance: "
+            "Relevance: "
             f"{article.get('relevance_score', 0)}"
         )
 
