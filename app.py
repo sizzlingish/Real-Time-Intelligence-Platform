@@ -565,6 +565,156 @@ def show_weather(question_text):
                 "weather_code"
             )
 
+            # ========================================================
+            # WEATHER TITLE
+            # ========================================================
+
+            st.subheader(
+                f"🌤️ Weather in {extracted_location.title()}"
+            )
+
+            # ========================================================
+            # CURRENT WEATHER METRICS
+            # ========================================================
+
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+
+                st.metric(
+                    "Temperature",
+                    (
+                        f"{temperature} °C"
+                        if temperature is not None
+                        else "N/A"
+                    ),
+                )
+
+            with col2:
+
+                st.metric(
+                    "Humidity",
+                    (
+                        f"{humidity}%"
+                        if humidity is not None
+                        else "N/A"
+                    ),
+                )
+
+            with col3:
+
+                st.metric(
+                    "Wind",
+                    (
+                        f"{wind_speed} km/h"
+                        if wind_speed is not None
+                        else "N/A"
+                    ),
+                )
+
+            # ========================================================
+            # WEATHER CODE
+            # ========================================================
+
+            if weather_code is not None:
+
+                st.caption(
+                    f"Weather code: {weather_code}"
+                )
+
+            # ========================================================
+            # NATURAL WEATHER ANSWER
+            # ========================================================
+
+            if temperature is not None:
+
+                if temperature <= 5:
+
+                    temperature_feeling = "very cold"
+
+                elif temperature <= 12:
+
+                    temperature_feeling = "quite cold"
+
+                elif temperature <= 18:
+
+                    temperature_feeling = "cool"
+
+                elif temperature <= 25:
+
+                    temperature_feeling = "mild"
+
+                elif temperature <= 32:
+
+                    temperature_feeling = "warm"
+
+                else:
+
+                    temperature_feeling = "hot"
+
+                weather_description = (
+                    get_weather_description(
+                        weather_code
+                    )
+                )
+
+                natural_answer = (
+                    f"It's {temperature_feeling} in "
+                    f"{extracted_location.title()} right now, "
+                    f"with a temperature of {temperature}°C "
+                    f"and {weather_description}."
+                )
+
+                if humidity is not None:
+
+                    natural_answer += (
+                        f" Humidity is {humidity}%."
+                    )
+
+                if wind_speed is not None:
+
+                    natural_answer += (
+                        f" Winds are around "
+                        f"{wind_speed} km/h."
+                    )
+
+                st.info(
+                    f"🌤️ {natural_answer}"
+                )
+
+        except Exception as error:
+
+            st.error(
+                f"Unable to retrieve weather information: {error}"
+            )
+
+        try:
+
+            weather_data = fetch_weather(
+                location=extracted_location
+            )
+
+            current = weather_data.get(
+                "current",
+                {}
+            )
+
+            temperature = current.get(
+                "temperature_2m"
+            )
+
+            humidity = current.get(
+                "relative_humidity_2m"
+            )
+
+            wind_speed = current.get(
+                "wind_speed_10m"
+            )
+
+            weather_code = current.get(
+                "weather_code"
+            )
+
             st.subheader(
                 f"🌤️ Weather in {extracted_location.title()}"
             )
