@@ -481,9 +481,43 @@ def extract_weather_location(question_text):
     return extracted_location
 
 
+
 # ============================================================
 # WEATHER DISPLAY
 # ============================================================
+
+def get_weather_description(weather_code):
+
+    weather_descriptions = {
+        0: "clear skies",
+        1: "mostly clear skies",
+        2: "partly cloudy skies",
+        3: "overcast skies",
+        45: "foggy conditions",
+        48: "foggy conditions",
+        51: "light drizzle",
+        53: "moderate drizzle",
+        55: "heavy drizzle",
+        61: "light rain",
+        63: "moderate rain",
+        65: "heavy rain",
+        71: "light snow",
+        73: "moderate snow",
+        75: "heavy snow",
+        80: "light rain showers",
+        81: "moderate rain showers",
+        82: "heavy rain showers",
+        85: "light snow showers",
+        86: "heavy snow showers",
+        95: "a thunderstorm",
+        96: "a thunderstorm with light hail",
+        99: "a thunderstorm with heavy hail",
+    }
+
+    return weather_descriptions.get(
+        weather_code,
+        "current conditions"
+    )
 
 def show_weather(question_text):
 
