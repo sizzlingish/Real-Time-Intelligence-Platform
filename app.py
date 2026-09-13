@@ -1,4 +1,3 @@
-import re
 import streamlit as st
 
 from news_api import fetch_news
@@ -187,16 +186,6 @@ st.markdown(
         border-radius: 10px;
     }
 
-    .search-query {
-        background-color: #0f172a;
-        border: 1px solid #1e293b;
-        border-radius: 10px;
-        padding: 10px 14px;
-        margin: 10px 0 20px 0;
-        color: #94a3b8;
-        font-size: 0.9rem;
-    }
-
     ::-webkit-scrollbar {
         width: 8px;
     }
@@ -340,77 +329,47 @@ def is_weather_question(text):
         "forecast",
         "rain",
         "raining",
-        "rainy",
         "humidity",
         "wind",
-        "windy",
         "hot",
         "cold",
-        "warm",
-        "cool",
-        "snow",
-        "snowing",
-        "snowy",
-        "storm",
-        "sunny",
-        "cloudy",
     ]
 
     text = text.lower()
 
     return any(
-        re.search(
-            r"\b" + re.escape(word) + r"\b",
-            text,
-        )
+        word in text
         for word in weather_words
     )
 
 
 # ============================================================
-# WEATHER LOCATION EXTRACTION
+# WEATHER DISPLAY
 # ============================================================
 
-def extract_weather_location(question_text):
+def show_weather(question_text):
+
+    import re
 
     text = question_text.strip()
 
     patterns = [
 
-        # Weather
-        r"weather\s+(?:in|at|for|of)\s+(.+)",
+        r"weather\s+(?:in|at|for)\s+(.+)",
+
+        r"temperature\s+(?:in|at|for)\s+(.+)",
+
+        r"forecast\s+(?:in|at|for)\s+(.+)",
+
         r"weather\s+(.+)",
 
-        # Temperature
-        r"temperature\s+(?:in|at|for|of)\s+(.+)",
         r"temperature\s+(.+)",
 
-        # Forecast
-        r"forecast\s+(?:in|at|for|of)\s+(.+)",
         r"forecast\s+(.+)",
 
-        # How is the weather
-        r"how(?:'s| is)\s+the\s+weather"
-        r"(?:\s+like)?\s+(?:in|at|for|of)\s+(.+)",
+        r"how(?:'s| is)\s+the\s+weather(?:\s+like)?\s+(?:in|at|for)\s+(.+)",
 
-        # What is the weather
-        r"what(?:'s| is)\s+the\s+weather"
-        r"(?:\s+like)?\s+(?:in|at|for|of)\s+(.+)",
-
-        # Is it hot/cold/raining/etc.
-        r"(?:is|will)\s+it\s+"
-        r"(?:cold|hot|warm|cool|raining|rainy|snowing|snowy|windy|sunny|cloudy)"
-        r"\s+(?:in|at|for)\s+(.+)",
-
-        # "How cold is it in London?"
-        r"how\s+(?:cold|hot|warm|cool)\s+is\s+it"
-        r"\s+(?:in|at|for)\s+(.+)",
-
-        # "Is London cold?"
-        r"is\s+(.+?)\s+"
-        r"(?:cold|hot|warm|cool|raining|rainy|snowing|snowy|windy|sunny|cloudy)"
-        r"\s*\??$",
-
+        r"what(?:'s| is)\s+the\s+weather(?:\s+like)?\s+(?:in|at|for)\s+(.+)",
     ]
 
     extracted_location = None
@@ -438,92 +397,6 @@ def extract_weather_location(question_text):
             .rstrip("?.!,")
             .strip()
         )
-
-        extracted_location = re.sub(
-            r"\b(today|tomorrow|right now|now)\b",
-            "",
-            extracted_location,
-            flags=re.IGNORECASE,
-        ).strip()
-
-    return extracted_location
-    for pattern in patterns:
-
-        match = re.search(
-            pattern,
-            text,
-            re.IGNORECASE,
-        )
-
-        if match:
-
-            extracted_location = match.group(
-                match.lastindex
-            ).strip()
-
-            break
-
-    if extracted_location:
-
-        extracted_location = (
-            extracted_location
-            .rstrip("?.!,")
-            .strip()
-        )
-
-        extracted_location = re.sub(
-            r"\b(today|tomorrow|right now|now)\b",
-            "",
-            extracted_location,
-            flags=re.IGNORECASE,
-        ).strip()
-
-    return extracted_location
-
-
-
-# ============================================================
-# WEATHER DISPLAY
-# ============================================================
-
-def get_weather_description(weather_code):
-
-    weather_descriptions = {
-        0: "clear skies",
-        1: "mostly clear skies",
-        2: "partly cloudy skies",
-        3: "overcast skies",
-        45: "foggy conditions",
-        48: "foggy conditions",
-        51: "light drizzle",
-        53: "moderate drizzle",
-        55: "heavy drizzle",
-        61: "light rain",
-        63: "moderate rain",
-        65: "heavy rain",
-        71: "light snow",
-        73: "moderate snow",
-        75: "heavy snow",
-        80: "light rain showers",
-        81: "moderate rain showers",
-        82: "heavy rain showers",
-        85: "light snow showers",
-        86: "heavy snow showers",
-        95: "a thunderstorm",
-        96: "a thunderstorm with light hail",
-        99: "a thunderstorm with heavy hail",
-    }
-
-    return weather_descriptions.get(
-        weather_code,
-        "current conditions"
-    )
-
-def show_weather(question_text):
-
-    extracted_location = extract_weather_location(
-        question_text
-    )
 
     if not extracted_location:
 
@@ -565,156 +438,6 @@ def show_weather(question_text):
                 "weather_code"
             )
 
-            # ========================================================
-            # WEATHER TITLE
-            # ========================================================
-
-            st.subheader(
-                f"🌤️ Weather in {extracted_location.title()}"
-            )
-
-            # ========================================================
-            # CURRENT WEATHER METRICS
-            # ========================================================
-
-            col1, col2, col3 = st.columns(3)
-
-            with col1:
-
-                st.metric(
-                    "Temperature",
-                    (
-                        f"{temperature} °C"
-                        if temperature is not None
-                        else "N/A"
-                    ),
-                )
-
-            with col2:
-
-                st.metric(
-                    "Humidity",
-                    (
-                        f"{humidity}%"
-                        if humidity is not None
-                        else "N/A"
-                    ),
-                )
-
-            with col3:
-
-                st.metric(
-                    "Wind",
-                    (
-                        f"{wind_speed} km/h"
-                        if wind_speed is not None
-                        else "N/A"
-                    ),
-                )
-
-            # ========================================================
-            # WEATHER CODE
-            # ========================================================
-
-            if weather_code is not None:
-
-                st.caption(
-                    f"Weather code: {weather_code}"
-                )
-
-            # ========================================================
-            # NATURAL WEATHER ANSWER
-            # ========================================================
-
-            if temperature is not None:
-
-                if temperature <= 5:
-
-                    temperature_feeling = "very cold"
-
-                elif temperature <= 12:
-
-                    temperature_feeling = "quite cold"
-
-                elif temperature <= 18:
-
-                    temperature_feeling = "cool"
-
-                elif temperature <= 25:
-
-                    temperature_feeling = "mild"
-
-                elif temperature <= 32:
-
-                    temperature_feeling = "warm"
-
-                else:
-
-                    temperature_feeling = "hot"
-
-                weather_description = (
-                    get_weather_description(
-                        weather_code
-                    )
-                )
-
-                natural_answer = (
-                    f"It's {temperature_feeling} in "
-                    f"{extracted_location.title()} right now, "
-                    f"with a temperature of {temperature}°C "
-                    f"and {weather_description}."
-                )
-
-                if humidity is not None:
-
-                    natural_answer += (
-                        f" Humidity is {humidity}%."
-                    )
-
-                if wind_speed is not None:
-
-                    natural_answer += (
-                        f" Winds are around "
-                        f"{wind_speed} km/h."
-                    )
-
-                st.info(
-                    f"🌤️ {natural_answer}"
-                )
-
-        except Exception as error:
-
-            st.error(
-                f"Unable to retrieve weather information: {error}"
-            )
-
-        try:
-
-            weather_data = fetch_weather(
-                location=extracted_location
-            )
-
-            current = weather_data.get(
-                "current",
-                {}
-            )
-
-            temperature = current.get(
-                "temperature_2m"
-            )
-
-            humidity = current.get(
-                "relative_humidity_2m"
-            )
-
-            wind_speed = current.get(
-                "wind_speed_10m"
-            )
-
-            weather_code = current.get(
-                "weather_code"
-            )
-
             st.subheader(
                 f"🌤️ Weather in {extracted_location.title()}"
             )
@@ -754,55 +477,6 @@ def show_weather(question_text):
                     ),
                 )
 
-            # ========================================================
-# NATURAL WEATHER ANSWER
-# ========================================================
-
-weather_description = get_weather_description(
-    weather_code
-)
-
-if temperature is not None:
-
-    if temperature <= 5:
-        temperature_feeling = "very cold"
-
-    elif temperature <= 12:
-        temperature_feeling = "quite cold"
-
-    elif temperature <= 18:
-        temperature_feeling = "cool"
-
-    elif temperature <= 25:
-        temperature_feeling = "mild"
-
-    elif temperature <= 32:
-        temperature_feeling = "warm"
-
-    else:
-        temperature_feeling = "hot"
-
-    natural_answer = (
-        f"It's {temperature_feeling} in "
-        f"{extracted_location.title()} right now, "
-        f"with a temperature of {temperature}°C "
-        f"and {weather_description}."
-    )
-
-    if humidity is not None:
-        natural_answer += (
-            f" Humidity is {humidity}%."
-        )
-
-    if wind_speed is not None:
-        natural_answer += (
-            f" Winds are around {wind_speed} km/h."
-        )
-
-    st.info(
-        f"🌤️ {natural_answer}"
-    )
-
             if weather_code is not None:
 
                 st.caption(
@@ -814,242 +488,6 @@ if temperature is not None:
             st.error(
                 f"Unable to retrieve weather information: {error}"
             )
-
-
-# ============================================================
-# NEWS SEARCH QUERY CLEANER
-# ============================================================
-
-def build_news_search_query(
-    question,
-    location,
-    topic,
-):
-    """
-    Converts a natural-language question into a shorter
-    search query suitable for NewsData and GNews.
-
-    IMPORTANT:
-    The original question is NOT modified.
-
-    Example:
-
-    User question:
-        What are the biggest risks and benefits of AI for jobs?
-
-    API query:
-        AI risks benefits jobs
-
-    The full user question is still sent to the AI.
-    """
-
-    # --------------------------------------------------------
-    # Remove URLs
-    # --------------------------------------------------------
-
-    query = re.sub(
-        r"https?://\S+|www\.\S+",
-        " ",
-        question,
-        flags=re.IGNORECASE,
-    )
-
-    # --------------------------------------------------------
-    # Remove punctuation
-    # --------------------------------------------------------
-
-    query = re.sub(
-        r"[^\w\s-]",
-        " ",
-        query,
-    )
-
-    # --------------------------------------------------------
-    # Lowercase
-    # --------------------------------------------------------
-
-    query = query.lower()
-
-    # --------------------------------------------------------
-    # Common conversational words
-    # --------------------------------------------------------
-
-    stop_words = {
-        "what",
-        "whats",
-        "why",
-        "how",
-        "when",
-        "where",
-        "who",
-        "which",
-        "whose",
-
-        "is",
-        "are",
-        "was",
-        "were",
-        "be",
-        "been",
-        "being",
-
-        "do",
-        "does",
-        "did",
-
-        "can",
-        "could",
-        "will",
-        "would",
-        "should",
-        "may",
-        "might",
-
-        "the",
-        "a",
-        "an",
-
-        "and",
-        "or",
-        "but",
-        "if",
-        "then",
-        "than",
-
-        "to",
-        "of",
-        "for",
-        "in",
-        "on",
-        "at",
-        "by",
-        "with",
-        "from",
-        "into",
-        "about",
-
-        "this",
-        "that",
-        "these",
-        "those",
-
-        "it",
-        "its",
-        "they",
-        "their",
-        "them",
-
-        "we",
-        "our",
-        "you",
-        "your",
-
-        "i",
-        "me",
-        "my",
-
-        "recent",
-        "reports",
-        "report",
-        "suggest",
-        "suggests",
-        "according",
-
-        "latest",
-        "currently",
-        "current",
-
-        "information",
-        "news",
-    }
-
-    # --------------------------------------------------------
-    # Extract important words
-    # --------------------------------------------------------
-
-    words = query.split()
-
-    important_words = [
-        word
-        for word in words
-        if word not in stop_words
-        and len(word) > 2
-    ]
-
-    # --------------------------------------------------------
-    # Remove duplicate words
-    # --------------------------------------------------------
-
-    unique_words = []
-
-    for word in important_words:
-
-        if word not in unique_words:
-
-            unique_words.append(word)
-
-    # --------------------------------------------------------
-    # Add sidebar location
-    # --------------------------------------------------------
-
-    if location not in [
-        None,
-        "",
-        "No specific location",
-        "Worldwide",
-    ]:
-
-        location_words = re.sub(
-            r"[^\w\s-]",
-            " ",
-            location.lower(),
-        ).split()
-
-        for word in reversed(location_words):
-
-            if word not in unique_words:
-
-                unique_words.insert(
-                    0,
-                    word,
-                )
-
-    # --------------------------------------------------------
-    # Add sidebar topic
-    # --------------------------------------------------------
-
-    if topic not in [
-        None,
-        "",
-        "All Topics",
-    ]:
-
-        topic_words = re.sub(
-            r"[^\w\s-]",
-            " ",
-            topic.lower(),
-        ).split()
-
-        for word in reversed(topic_words):
-
-            if word not in unique_words:
-
-                unique_words.insert(
-                    0,
-                    word,
-                )
-
-    # --------------------------------------------------------
-    # Keep query reasonably short
-    # --------------------------------------------------------
-
-    unique_words = unique_words[:12]
-
-    search_query = " ".join(
-        unique_words
-    ).strip()
-
-    return search_query
 
 
 # ============================================================
@@ -1119,16 +557,6 @@ question = st.chat_input(
 
 if question:
 
-    question = question.strip()
-
-    if not question:
-
-        st.warning(
-            "Please enter a question."
-        )
-
-        st.stop()
-
     # ========================================================
     # WEATHER
     # ========================================================
@@ -1137,42 +565,45 @@ if question:
 
         show_weather(question)
 
-        # Weather questions do not go through news APIs.
         st.stop()
 
+
     # ========================================================
-    # BUILD CLEAN NEWS SEARCH QUERY
+    # BUILD NEWS SEARCH QUERY
     # ========================================================
 
-    search_query = build_news_search_query(
-        question=question,
-        location=news_location,
-        topic=topic,
-    )
+    search_parts = []
 
-    if not search_query:
 
-        st.warning(
-            "I couldn't create a useful news search query "
-            "from your question. Try adding a few specific "
-            "keywords."
+    # Add location only if the user selected one
+    if news_location not in [
+        "No specific location",
+        "Worldwide",
+    ]:
+
+        search_parts.append(
+            news_location
         )
 
-        st.stop()
 
-    # --------------------------------------------------------
-    # Display the query used by the news APIs
-    # --------------------------------------------------------
+    # Add topic only if the user selected one
+    if topic != "All Topics":
 
-    st.markdown(
-        f"""
-        <div class="search-query">
-            🔎 <strong>News search:</strong>
-            {search_query}
-        </div>
-        """,
-        unsafe_allow_html=True,
+        search_parts.append(
+            topic
+        )
+
+
+    # Always include the actual user question
+    search_parts.append(
+        question
     )
+
+
+    search_query = " ".join(
+        search_parts
+    )
+
 
     # ========================================================
     # FETCH NEWS
@@ -1182,6 +613,7 @@ if question:
 
     newsdata_error = None
     gnews_error = None
+
 
     # --------------------------------------------------------
     # NEWSDATA
@@ -1209,6 +641,7 @@ if question:
 
             newsdata_error = str(error)
 
+
     # --------------------------------------------------------
     # GNEWS
     # --------------------------------------------------------
@@ -1235,6 +668,7 @@ if question:
 
             gnews_error = str(error)
 
+
     # ========================================================
     # NO ARTICLES
     # ========================================================
@@ -1257,15 +691,11 @@ if question:
                 f"GNews: {gnews_error}"
             )
 
-        st.info(
-            "Try a shorter search-oriented question, "
-            "for example: `AI impact on jobs`."
-        )
-
         st.stop()
 
+
     # ========================================================
-    # RETRIEVE / DEDUPLICATE / RANK
+    # RETRIEVE MOST RELEVANT ARTICLES
     # ========================================================
 
     relevant_articles = retrieve_articles(
@@ -1273,6 +703,7 @@ if question:
         question,
         max_articles=article_limit,
     )
+
 
     if not relevant_articles:
 
@@ -1282,10 +713,6 @@ if question:
 
         st.stop()
 
-    st.success(
-        f"Retrieved {len(relevant_articles)} "
-        f"relevant articles."
-    )
 
     # ========================================================
     # AI INTELLIGENCE
@@ -1294,6 +721,7 @@ if question:
     st.subheader(
         "🧠 Intelligence"
     )
+
 
     try:
 
@@ -1315,6 +743,7 @@ if question:
                     concise=True,
                 )
 
+
             # ------------------------------------------------
             # DETAILED MODE
             # ------------------------------------------------
@@ -1329,6 +758,7 @@ if question:
                     concise=False,
                 )
 
+
             # ------------------------------------------------
             # ADVANCED RESEARCH MODE
             # ------------------------------------------------
@@ -1342,7 +772,9 @@ if question:
                     topic=topic,
                 )
 
+
         st.markdown(answer)
+
 
     except Exception as error:
 
@@ -1351,6 +783,7 @@ if question:
         )
 
         st.stop()
+
 
     # ========================================================
     # VISUAL INTELLIGENCE
@@ -1361,6 +794,7 @@ if question:
     st.subheader(
         "📊 Visual Intelligence"
     )
+
 
     try:
 
@@ -1376,6 +810,7 @@ if question:
                 )
             )
 
+
         if visualization_result:
 
             render_visualizations_in_streamlit(
@@ -1389,11 +824,13 @@ if question:
                 "for this question and the available data."
             )
 
+
     except Exception as error:
 
         st.warning(
             f"Visualization could not be generated: {error}"
         )
+
 
     # ========================================================
     # SOURCES
